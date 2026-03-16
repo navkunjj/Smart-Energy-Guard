@@ -9,7 +9,9 @@ import {
   LogOut,
   Menu,
   X,
+  Smartphone,
 } from 'lucide-react';
+import { usePWAInstall } from '../hooks/usePWAInstall';
 
 const menuItems = [
   { id: 'dashboard',  label: 'Monitor',       icon: LayoutDashboard },
@@ -58,6 +60,7 @@ const SidebarItem = ({ item, active, onClick }) => {
 
 const Sidebar = ({ activeTab, setActiveTab, status }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { isInstallable, installApp } = usePWAInstall();
 
   const handleNav = (id) => {
     setActiveTab(id);
@@ -86,6 +89,16 @@ const Sidebar = ({ activeTab, setActiveTab, status }) => {
           {menuItems.map(item => (
             <SidebarItem key={item.id} item={item} active={activeTab === item.id} onClick={handleNav} />
           ))}
+
+          {isInstallable && (
+            <button
+              onClick={installApp}
+              className="w-full flex items-center gap-3 px-4 py-3 mt-4 rounded-xl transition-all duration-200 bg-emerald-600/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-600/20"
+            >
+              <Smartphone size={20} />
+              <span className="font-medium text-sm">Install App</span>
+            </button>
+          )}
         </nav>
 
         {/* Status footer */}
@@ -145,6 +158,19 @@ const Sidebar = ({ activeTab, setActiveTab, status }) => {
             className="relative mt-[60px] mx-4 glass-card rounded-2xl border border-white/10 p-4 space-y-1 shadow-2xl"
             onClick={e => e.stopPropagation()}
           >
+            {isInstallable && (
+              <button
+                onClick={installApp}
+                className="w-full flex items-center gap-3 px-4 py-4 rounded-xl transition-all duration-200 bg-blue-600 text-white shadow-lg shadow-blue-600/20 mb-2"
+              >
+                <Smartphone size={22} />
+                <div className="text-left">
+                  <p className="font-bold text-sm leading-none">Download App</p>
+                  <p className="text-[10px] opacity-80 mt-1 uppercase tracking-widest">Install on Home Screen</p>
+                </div>
+              </button>
+            )}
+
             {menuItems.map(item => (
               <SidebarItem key={item.id} item={item} active={activeTab === item.id} onClick={handleNav} />
             ))}
