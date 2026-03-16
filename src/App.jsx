@@ -1,0 +1,260 @@
+import React, { useState, useEffect } from 'react';
+import Sidebar from './components/Sidebar';
+import LiveMonitoringCard from './components/LiveMonitoringCard';
+import TheftDetectionStatus from './components/TheftDetectionStatus';
+import SocietyLayout from './components/SocietyLayout';
+import DeviceControls from './components/DeviceControls';
+import RealTimeChart from './components/RealTimeChart';
+import EventLog from './components/EventLog';
+import LCDMessageSender from './components/LCDMessageSender';
+import AnalyticsPage from './components/AnalyticsPage';
+import ControlPage from './components/ControlPage';
+import LogsPage from './components/LogsPage';
+import ESP32StatusCard from './components/ESP32StatusCard';
+import ConnectionStatusBar from './components/ConnectionStatusBar';
+import CalibrationPanel from './components/CalibrationPanel';
+import { useFirebaseData } from './hooks/useFirebaseData';
+import {
+  Activity,
+  Zap,
+  Waves,
+  Cpu,
+  BatteryMedium,
+  Bell,
+} from 'lucide-react';
+
+function App() {
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const {
+    readings, status, controls, logs,
+    updateControl, sendLCDMessage, resetSystem,
+    dbConnected, connectionQuality, lastDbPing,
+    calibrationState, runCalibration,
+  } = useFirebaseData();
+
+  const [chartHistory, setChartHistory] = useState({ current: [], power: [] });
+
+  useEffect(() => {
+    const time = new Date().toLocaleTimeString([], {
+      hour: '2-digit', minute: '2-digit', second: '2-digit'
+    });
+    setChartHistory(prev => ({
+      current: [...prev.current, { time, value: readings.mainLine }].slice(-20),
+      power:   [...prev.power,   { time, value: readings.totalPower }].slice(-20),
+    }));
+  }, [readings.timestamp, readings.mainLine, readings.totalPower]);
+
+  const renderPage = () => {
+    switch (activeTab) {
+      case 'analytics':
+        return <AnalyticsPage readings={readings} chartHistory={chartHistory} />;
+      case 'control':
+        return (
+          <ControlPage
+            controls={controls}
+            updateControl={updateControl}
+            resetSystem={resetSystem}
+            status={status}
+            readings={readings}
+            sendLCDMessage={sendLCDMessage}
+          />
+        );
+      case 'logs':
+        return <LogsPage logs={logs} />;
+      default:
+        return (
+          <DashboardPage
+            readings={readings}
+            status={status}
+            controls={controls}
+            logs={logs}
+            chartHistory={chartHistory}
+            updateControl={updateControl}
+            sendLCDMessage={sendLCDMessage}
+            resetSystem={resetSystem}
+            calibrationState={calibrationState}
+            runCalibration={runCalibration}
+          />
+        );
+    }
+  };
+
+  return (
+    <div className="flex min-h-screen bg-[#0f172a] industrial-grid text-slate-200">
+      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} status={status} />
+
+      {/*
+        Desktop: offset by sidebar width (lg:ml-64)
+        Mobile:  no offset, top padding for mobile navbar, bottom padding for tab bar
+      */}
+      <main className="flex-1 lg:ml-64 pt-[60px] lg:pt-0 pb-[72px] lg:pb-0 px-4 md:px-6 lg:px-8 py-4 lg:py-8">
+
+        {/* ── Header ─────────────────────────────────────────────── */}
+        <header className="flex flex-col gap-3 mb-6 lg:mb-8 pt-2 lg:pt-0">
+          <p className="text-slate-400 font-medium uppercase tracking-[0.2em] text-[9px]">
+            Energy Guard Society • Node ID: ESP32-Z90
+          </p>
+
+          {/* Status bar row — scrollable on very small screens */}
+          <div className="flex items-center gap-3 overflow-x-auto pb-1 scrollbar-none">
+            <div className="flex items-center gap-2 px-3 py-2 glass-card rounded-2xl shrink-0">
+              <ConnectionStatusBar
+                status={status}
+                dbConnected={dbConnected}
+                connectionQuality={connectionQuality}
+                lastDbPing={lastDbPing}
+              />
+            </div>
+
+            <div className="flex items-center gap-2 px-3 py-2 glass-card rounded-xl shrink-0">
+              <Cpu size={14} className="text-indigo-400" />
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-300">
+                {status.sensorStatus}
+              </span>
+            </div>
+
+            <button className="p-2.5 glass-card rounded-xl text-slate-400 hover:text-white transition-colors relative shrink-0 ml-auto">
+              <Bell size={18} />
+              {status.theftDetected && (
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full pulse-indicator" />
+              )}
+            </button>
+          </div>
+        </header>
+
+        {/* ── Page Content ───────────────────────────────────────── */}
+        {renderPage()}
+
+        {/* ── Footer ─────────────────────────────────────────────── */}
+        <footer className="mt-10 py-6 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-3">
+          <p className="text-slate-500 text-[11px] font-medium text-center">
+            © 2026 Energy Guard Society. Industrial IoT Surveillance System.
+          </p>
+          <div className="flex items-center gap-4 text-[10px] font-black uppercase text-slate-500">
+            <span className="hover:text-blue-400 cursor-pointer transition-colors">Docs</span>
+            <span className="w-1 h-1 bg-slate-700 rounded-full" />
+            <span className="hover:text-blue-400 cursor-pointer transition-colors">Support</span>
+            <span className="w-1 h-1 bg-slate-700 rounded-full" />
+            <span className="hover:text-blue-400 cursor-pointer transition-colors">Privacy</span>
+          </div>
+        </footer>
+      </main>
+    </div>
+  );
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   Dashboard page
+   ═══════════════════════════════════════════════════════════════════ */
+function DashboardPage({
+  readings, status, controls, logs, chartHistory,
+  updateControl, sendLCDMessage, resetSystem,
+  calibrationState, runCalibration
+}) {
+  const batteryPct = Math.max(0, Math.min(100,
+    Math.round(((readings.voltage - 6.0) / (8.4 - 6.0)) * 100)
+  ));
+
+  return (
+    <>
+      <header className="mb-6">
+        <h1 className="text-2xl lg:text-3xl font-black text-white tracking-tight">DASHBOARD</h1>
+      </header>
+
+      {/* Theft alert + ESP32 status */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6 mb-6 lg:mb-8">
+        <div className="lg:col-span-2">
+          <TheftDetectionStatus status={status} onReset={resetSystem} />
+        </div>
+        <div>
+          <ESP32StatusCard status={status} />
+        </div>
+      </div>
+
+      {/* Stats grid — 2 cols on phones, 4 on desktop */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-6 mb-6 lg:mb-8">
+        <LiveMonitoringCard
+          title="Battery Voltage"
+          value={readings.voltage ?? 0}
+          unit="V DC"
+          icon={Zap}
+          color="blue"
+          liveFlash
+        />
+        <LiveMonitoringCard
+          title="Total Current"
+          value={readings.mainLine ? (readings.mainLine * 1000).toFixed(0) : 0}
+          unit="mA"
+          icon={Waves}
+          color="purple"
+          liveFlash
+        />
+        <LiveMonitoringCard
+          title="Output Power"
+          value={readings.totalPower ?? 0}
+          unit="W"
+          icon={Activity}
+          color="green"
+          liveFlash
+        />
+        <LiveMonitoringCard
+          title="Battery Level"
+          value={batteryPct}
+          unit="%"
+          icon={BatteryMedium}
+          color="orange"
+          liveFlash
+        />
+      </div>
+
+      {/* Calibration panel */}
+      <div className="mb-6 lg:mb-8">
+        <CalibrationPanel calibrationState={calibrationState} runCalibration={runCalibration} />
+      </div>
+
+      {/* Society map + device controls */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-8 mb-6 lg:mb-8">
+        <div className="lg:col-span-2">
+          <SocietyLayout readings={readings} status={status} />
+        </div>
+        <div className="space-y-4 lg:space-y-8">
+          <DeviceControls
+            controls={controls}
+            updateControl={updateControl}
+            resetSystem={resetSystem}
+          />
+          <LCDMessageSender onSend={sendLCDMessage} />
+        </div>
+      </div>
+
+      {/* Charts + event log */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-8">
+        <div className="glass-card p-4 lg:p-6 rounded-2xl">
+          <div className="flex items-center justify-between mb-4 lg:mb-6">
+            <h3 className="text-xs lg:text-sm font-bold text-white uppercase tracking-wider">
+              Live Load Profiling
+            </h3>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1.5">
+                <div className="w-2 h-2 rounded-full bg-blue-500" />
+                <span className="text-[10px] text-gray-500 font-bold uppercase">Current</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                <span className="text-[10px] text-gray-500 font-bold uppercase">Power</span>
+              </div>
+            </div>
+          </div>
+          <div className="space-y-4">
+            <RealTimeChart data={chartHistory.current} label="Main Current (A)" color="rgba(59, 130, 246, 0.2)" />
+            <RealTimeChart data={chartHistory.power}   label="Total Power (W)"  color="rgba(16, 185, 129, 0.2)" />
+          </div>
+        </div>
+
+        <EventLog logs={logs} />
+      </div>
+    </>
+  );
+}
+
+export default App;
