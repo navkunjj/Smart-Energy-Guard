@@ -16,7 +16,7 @@ const lineOptions = {
   maintainAspectRatio: false,
   interaction: { mode: 'index', intersect: false },
   plugins: {
-    legend: { display: true, labels: { color: '#94a3b8', font: { size: 11 }, boxWidth: 12 } },
+    legend: { display: true, labels: { color: 'rgba(148, 163, 184, 0.7)', font: { size: 11 }, boxWidth: 12 } },
     tooltip: {
       backgroundColor: 'rgba(15,23,42,0.95)',
       titleColor: '#94a3b8', bodyColor: '#fff',
@@ -24,8 +24,8 @@ const lineOptions = {
     },
   },
   scales: {
-    y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748b', font: { size: 10 } } },
-    x: { grid: { display: false }, ticks: { color: '#64748b', font: { size: 10 }, maxTicksLimit: 8, maxRotation: 0 } },
+    y: { grid: { color: 'rgba(128,128,128,0.1)' }, ticks: { color: 'rgba(148, 163, 184, 0.7)', font: { size: 10 } } },
+    x: { grid: { display: false }, ticks: { color: 'rgba(148, 163, 184, 0.7)', font: { size: 10 }, maxTicksLimit: 8, maxRotation: 0 } },
   },
 };
 
@@ -81,7 +81,7 @@ const AnalyticsPage = ({ readings, chartHistory }) => {
   const doughnutOptions = {
     responsive: true, maintainAspectRatio: false, cutout: '70%',
     plugins: {
-      legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 11 }, boxWidth: 12, padding: 16 } },
+      legend: { position: 'bottom', labels: { color: 'rgba(148, 163, 184, 0.7)', font: { size: 11 }, boxWidth: 12, padding: 16 } },
       tooltip: { backgroundColor: 'rgba(15,23,42,0.95)', titleColor: '#94a3b8', bodyColor: '#fff', borderColor: 'rgba(255,255,255,0.1)', borderWidth: 1 },
     },
   };
@@ -96,17 +96,17 @@ const AnalyticsPage = ({ readings, chartHistory }) => {
   ];
 
   const colorMap = {
-    blue: 'border-blue-500/30 text-blue-400 bg-blue-500/10',
-    green: 'border-emerald-500/30 text-emerald-400 bg-emerald-500/10',
-    orange: 'border-orange-500/30 text-orange-400 bg-orange-500/10',
-    purple: 'border-purple-500/30 text-purple-400 bg-purple-500/10',
+    blue: 'border-blue-500/30 text-blue-500 bg-blue-500/10',
+    green: 'border-emerald-500/30 text-emerald-500 bg-emerald-500/10',
+    orange: 'border-orange-500/30 text-orange-500 bg-orange-500/10',
+    purple: 'border-purple-500/30 text-purple-500 bg-purple-500/10',
   };
 
   return (
     <div>
       <header className="mb-8">
-        <h1 className="text-3xl font-black text-white tracking-tight">ANALYTICS</h1>
-        <p className="text-slate-400 font-medium uppercase tracking-[0.2em] text-[10px] mt-1">
+        <h1 className="text-3xl font-black tracking-tight">ANALYTICS</h1>
+        <p className="opacity-40 font-medium uppercase tracking-[0.2em] text-[10px] mt-1">
           Real-Time Power Consumption Analysis
         </p>
       </header>
@@ -119,10 +119,10 @@ const AnalyticsPage = ({ readings, chartHistory }) => {
             <div key={card.label} className="glass-card p-5 rounded-2xl">
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-1">{card.label}</p>
+                  <p className="text-xs font-medium opacity-40 uppercase tracking-wider mb-1">{card.label}</p>
                   <div className="flex items-baseline gap-1">
-                    <h3 className="text-2xl font-bold text-white">{card.value}</h3>
-                    <span className="text-sm font-medium text-gray-400">{card.unit}</span>
+                    <h3 className="text-2xl font-bold">{card.value}</h3>
+                    <span className="text-sm font-medium opacity-40">{card.unit}</span>
                   </div>
                 </div>
                 <div className={`p-3 rounded-xl border ${colorMap[card.color]}`}>
@@ -131,11 +131,11 @@ const AnalyticsPage = ({ readings, chartHistory }) => {
               </div>
               {card.trend !== 0 && (
                 <div className="mt-3 flex items-center gap-2">
-                  <div className={`flex items-center text-[10px] font-bold px-2 py-0.5 rounded-full ${card.trend > 0 ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'}`}>
+                  <div className={`flex items-center text-[10px] font-bold px-2 py-0.5 rounded-full ${card.trend > 0 ? 'bg-emerald-500/20 text-emerald-500' : 'bg-rose-500/20 text-rose-500'}`}>
                     {card.trend > 0 ? <TrendingUp size={12} className="mr-1" /> : <TrendingDown size={12} className="mr-1" />}
                     {Math.abs(card.trend)}%
                   </div>
-                  <span className="text-[10px] text-gray-500 uppercase font-medium">vs last hour</span>
+                  <span className="text-[10px] opacity-40 uppercase font-medium">vs last hour</span>
                 </div>
               )}
             </div>
@@ -146,20 +146,20 @@ const AnalyticsPage = ({ readings, chartHistory }) => {
       {/* Charts Row 1 */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
         <div className="lg:col-span-2 glass-card p-6 rounded-2xl">
-          <h3 className="text-sm font-bold text-white uppercase tracking-wider mb-6">Per-House Current (Live)</h3>
+          <h3 className="text-sm font-bold uppercase tracking-wider mb-6">Per-House Current (Live)</h3>
           <div className="h-64">
             <Line data={multiLineData} options={lineOptions} />
           </div>
         </div>
 
         <div className="glass-card p-6 rounded-2xl flex flex-col">
-          <h3 className="text-sm font-bold text-white uppercase tracking-wider mb-6">Load Distribution</h3>
+          <h3 className="text-sm font-bold uppercase tracking-wider mb-6">Load Distribution</h3>
           <div className="flex-1 relative min-h-[200px]">
             <Doughnut data={doughnutData} options={doughnutOptions} />
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
               <div className="text-center mt-[-20px]">
-                <p className="text-xs text-gray-500 uppercase font-bold">Total</p>
-                <p className="text-xl font-black text-white">{totalCurrent.toFixed(1)}A</p>
+                <p className="text-xs opacity-40 uppercase font-bold">Total</p>
+                <p className="text-xl font-black">{totalCurrent.toFixed(1)}A</p>
               </div>
             </div>
           </div>
@@ -169,14 +169,14 @@ const AnalyticsPage = ({ readings, chartHistory }) => {
       {/* Charts Row 2 */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="glass-card p-6 rounded-2xl">
-          <h3 className="text-sm font-bold text-white uppercase tracking-wider mb-6">Comparative House Load (Current)</h3>
+          <h3 className="text-sm font-bold uppercase tracking-wider mb-6">Comparative House Load (Current)</h3>
           <div className="h-56">
             <Bar data={barData} options={barOptions} />
           </div>
         </div>
 
         <div className="glass-card p-6 rounded-2xl">
-          <h3 className="text-sm font-bold text-white uppercase tracking-wider mb-6">Main Line Power Trend</h3>
+          <h3 className="text-sm font-bold uppercase tracking-wider mb-6">Main Line Power Trend</h3>
           <div className="h-56">
             <Line
               data={{

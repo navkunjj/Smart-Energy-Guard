@@ -18,7 +18,7 @@ const LCDMessageSender = ({ onSend }) => {
         <div className="p-2 bg-indigo-500/10 rounded-lg text-indigo-400 border border-indigo-500/20">
           <MessageSquareText size={18} />
         </div>
-        <h3 className="text-[10px] md:text-sm font-bold text-gray-400 uppercase tracking-widest">LCD Interface</h3>
+        <h3 className="text-[10px] md:text-sm font-bold opacity-40 uppercase tracking-widest">LCD Interface</h3>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -29,9 +29,9 @@ const LCDMessageSender = ({ onSend }) => {
             placeholder="Type message for ESP32 LCD..."
             maxLength={32}
             rows={2}
-            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 transition-all resize-none"
+            className="w-full bg-[var(--card-bg)] border border-[var(--card-border)] rounded-xl px-4 py-3 text-sm placeholder:opacity-30 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 transition-all resize-none"
           />
-          <div className="absolute bottom-3 right-3 text-[9px] md:text-[10px] font-bold text-gray-600">
+          <div className="absolute bottom-3 right-3 text-[9px] md:text-[10px] font-bold opacity-30">
             {message.length}/32
           </div>
         </div>
@@ -46,7 +46,7 @@ const LCDMessageSender = ({ onSend }) => {
         </button>
       </form>
       
-      <p className="mt-4 text-[9px] text-gray-500 text-center italic">
+      <p className="mt-4 text-[9px] opacity-30 text-center italic">
         Limited to 32 chars for 16x2 LCD.
       </p>
     </div>

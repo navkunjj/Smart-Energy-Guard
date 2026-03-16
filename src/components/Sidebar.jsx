@@ -28,8 +28,8 @@ const MobileTab = ({ item, active, onClick }) => {
       onClick={() => onClick(item.id)}
       className={`flex flex-col items-center gap-1 px-3 py-2 rounded-xl flex-1 transition-all duration-200 ${
         active
-          ? 'text-blue-400 bg-blue-500/10'
-          : 'text-gray-500 hover:text-gray-300'
+          ? 'text-blue-500 bg-blue-500/10'
+          : 'opacity-40 hover:opacity-100'
       }`}
     >
       <Icon size={20} />
@@ -46,10 +46,10 @@ const SidebarItem = ({ item, active, onClick }) => {
   return (
     <button
       onClick={() => onClick(item.id)}
-      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 border border-transparent ${
         active
-          ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30 shadow-[0_0_15px_rgba(37,99,235,0.1)]'
-          : 'text-gray-400 hover:text-white hover:bg-white/5'
+          ? 'bg-blue-600/20 text-blue-500 border-blue-600/30 shadow-[0_0_15px_rgba(37,99,235,0.08)] font-bold'
+          : 'opacity-40 hover:opacity-100 hover:bg-[var(--hover-bg)] hover:border-[var(--hover-border)]'
       }`}
     >
       <Icon size={20} />
@@ -74,13 +74,13 @@ const Sidebar = ({ activeTab, setActiveTab, status }) => {
       {/* ── Desktop sidebar (hidden on mobile) ─────────────────── */}
       <aside className="hidden lg:flex w-64 h-screen glass-card fixed left-0 top-0 flex-col z-50">
         {/* Logo */}
-        <div className="p-6 flex items-center gap-3 border-b border-white/10">
+        <div className="p-6 flex items-center gap-3 border-b border-[var(--card-border)]">
           <div className="p-2 bg-blue-600 rounded-lg">
             <Zap className="text-white" size={24} />
           </div>
           <div>
-            <h1 className="text-sm font-bold text-white leading-none">ENERGY GUARD</h1>
-            <p className="text-[10px] text-gray-400 mt-1 uppercase tracking-wider">Smart Power Detection</p>
+            <h1 className="text-sm font-bold leading-none">ENERGY GUARD</h1>
+            <p className="text-[10px] opacity-60 mt-1 uppercase tracking-wider">Smart Power Detection</p>
           </div>
         </div>
 
@@ -102,11 +102,11 @@ const Sidebar = ({ activeTab, setActiveTab, status }) => {
         </nav>
 
         {/* Status footer */}
-        <div className="p-4 border-t border-white/10">
-          <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+        <div className="p-4 border-t border-[var(--card-border)]">
+          <div className="p-4 rounded-xl bg-[var(--card-bg)] border border-[var(--card-border)]">
             <div className="flex items-center gap-3 mb-3">
-              <Cpu size={18} className="text-emerald-400" />
-              <span className="text-xs font-semibold text-white">ESP32 Status</span>
+              <Cpu size={18} className="text-emerald-500" />
+              <span className="text-xs font-semibold">ESP32 Status</span>
             </div>
             <div className="flex items-center gap-2">
               <div className={`w-2 h-2 rounded-full ${isOnline ? 'bg-emerald-500 pulse-indicator' : 'bg-rose-500'}`} />
@@ -123,14 +123,14 @@ const Sidebar = ({ activeTab, setActiveTab, status }) => {
       </aside>
 
       {/* ── Mobile top navbar ───────────────────────────────────── */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 py-3 glass-card border-b border-white/10">
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 py-3 glass-card border-b border-[var(--card-border)]">
         <div className="flex items-center gap-2">
           <div className="p-1.5 bg-blue-600 rounded-lg">
             <Zap className="text-white" size={18} />
           </div>
           <div>
-            <p className="text-xs font-bold text-white leading-none">ENERGY GUARD</p>
-            <p className="text-[9px] text-gray-400 uppercase tracking-wider">Smart Power Detection</p>
+            <p className="text-xs font-bold leading-none">ENERGY GUARD</p>
+            <p className="text-[9px] opacity-60 uppercase tracking-wider">Smart Power Detection</p>
           </div>
         </div>
 
@@ -139,7 +139,7 @@ const Sidebar = ({ activeTab, setActiveTab, status }) => {
           <div className={`w-2 h-2 rounded-full ${isOnline ? 'bg-emerald-500 pulse-indicator' : 'bg-rose-500'}`} />
           <button
             onClick={() => setMobileOpen(v => !v)}
-            className="p-2 rounded-xl glass-card text-slate-300 hover:text-white transition-colors"
+            className="p-2 rounded-xl glass-card text-slate-400 hover:text-blue-400 transition-colors"
             aria-label="Menu"
           >
             {mobileOpen ? <X size={20} /> : <Menu size={20} />}

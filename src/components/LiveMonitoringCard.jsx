@@ -29,7 +29,7 @@ const LiveMonitoringCard = ({ title, value, unit, icon: Icon, trend, color, live
 
   return (
     <div
-      className={`glass-card p-5 rounded-2xl group hover:border-blue-500/50 transition-all duration-300 relative overflow-hidden
+      className={`glass-card p-5 rounded-2xl group hover:border-[var(--hover-border)] transition-all duration-300 relative overflow-hidden
         ${flash ? 'ring-1 ring-emerald-400/60' : 'ring-1 ring-transparent'}`}
       style={{ transition: 'ring-color 0.4s ease' }}
     >
@@ -37,22 +37,22 @@ const LiveMonitoringCard = ({ title, value, unit, icon: Icon, trend, color, live
       {liveFlash && (
         <span
           className={`absolute top-3 right-3 w-1.5 h-1.5 rounded-full transition-colors duration-300
-            ${flash ? 'bg-emerald-400 scale-125' : 'bg-slate-600'}`}
+            ${flash ? 'bg-emerald-400 scale-125' : 'bg-[var(--muted)]/40'}`}
           style={{ transition: 'background-color 0.3s, transform 0.3s' }}
         />
       )}
 
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-1">{title}</p>
+          <p className="text-xs font-medium opacity-60 uppercase tracking-wider mb-1">{title}</p>
           <div className="flex items-baseline gap-1">
             <h3
               className={`text-2xl font-bold transition-colors duration-300 tabular-nums
-                ${flash ? 'text-emerald-300' : 'text-white group-hover:text-blue-400'}`}
+                ${flash ? 'text-emerald-400' : 'group-hover:text-blue-500'}`}
             >
               {displayValue}
             </h3>
-            <span className="text-sm font-medium text-gray-400">{unit}</span>
+            <span className="text-sm font-medium opacity-50">{unit}</span>
           </div>
         </div>
         <div className={`p-3 rounded-xl border ${colorMap[color] || colorMap.blue}`}>

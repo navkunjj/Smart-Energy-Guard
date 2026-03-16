@@ -10,7 +10,7 @@ const DeviceControls = ({ controls, updateControl, resetSystem }) => {
 
   return (
     <div className="glass-card p-4 md:p-6 rounded-2xl">
-      <h3 className="text-[10px] md:text-sm font-bold text-gray-400 uppercase tracking-widest mb-4 md:mb-6">System Controls</h3>
+      <h3 className="text-[10px] md:text-sm font-bold opacity-40 uppercase tracking-widest mb-4 md:mb-6">System Controls</h3>
       
       <div className="grid grid-cols-2 xs:grid-cols-3 md:grid-cols-2 gap-3 md:gap-4">
         {controlButtons.map((btn) => {
@@ -24,15 +24,15 @@ const DeviceControls = ({ controls, updateControl, resetSystem }) => {
               className={`p-3 md:p-4 rounded-2xl border transition-all duration-300 flex flex-col items-center gap-2 md:gap-3 ${
                 isActive 
                 ? `${btn.activeBg} shadow-[0_0_15px_rgba(255,255,255,0.05)]` 
-                : 'bg-white/5 border-white/10 hover:border-white/20'
+                : 'bg-[var(--card-bg)] border-[var(--card-border)] hover:border-[var(--hover-border)]'
               }`}
             >
-              <div className={`p-2.5 md:p-3 rounded-xl ${isActive ? 'bg-white/10' : 'bg-white/5 text-gray-500'}`}>
+              <div className={`p-2.5 md:p-3 rounded-xl ${isActive ? 'bg-white/10' : 'bg-[var(--card-bg)] opacity-40'}`}>
                 <Icon size={20} className={isActive ? btn.color : ''} />
               </div>
               <div className="text-center">
-                <p className="text-[9px] font-black uppercase text-gray-500 mb-0.5">{btn.label}</p>
-                <p className={`text-[10px] font-bold uppercase tracking-widest ${isActive ? 'text-white' : 'text-gray-600'}`}>
+                <p className="text-[9px] font-black uppercase opacity-40 mb-0.5">{btn.label}</p>
+                <p className={`text-[10px] font-bold uppercase tracking-widest ${isActive ? 'text-[var(--foreground)]' : 'opacity-40'}`}>
                   {isActive ? 'ON' : 'OFF'}
                 </p>
               </div>
@@ -42,14 +42,14 @@ const DeviceControls = ({ controls, updateControl, resetSystem }) => {
         
         <button
           onClick={resetSystem}
-          className="p-3 md:p-4 rounded-2xl border bg-white/5 border-white/10 hover:bg-white/10 hover:border-blue-500/50 transition-all flex flex-col items-center gap-2 md:gap-3 col-span-2 xs:col-span-1 md:col-span-2 mt-1 md:mt-2"
+          className="p-3 md:p-4 rounded-2xl border bg-[var(--card-bg)] border-[var(--card-border)] hover:bg-[var(--hover-bg)] hover:border-[var(--hover-border)] transition-all flex flex-col items-center gap-2 md:gap-3 col-span-2 xs:col-span-1 md:col-span-2 mt-1 md:mt-2"
         >
           <div className="p-2.5 md:p-3 rounded-xl bg-blue-600/20 text-blue-400">
             <RotateCcw size={20} />
           </div>
           <div className="text-center">
-            <p className="text-[9px] font-black uppercase text-gray-500 mb-0.5">Emergency</p>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-white">RESET</p>
+            <p className="text-[9px] font-black uppercase opacity-40 mb-0.5">Emergency</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest">RESET</p>
           </div>
         </button>
       </div>

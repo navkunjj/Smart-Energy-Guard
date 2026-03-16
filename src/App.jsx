@@ -13,6 +13,7 @@ import LogsPage from './components/LogsPage';
 import ESP32StatusCard from './components/ESP32StatusCard';
 import ConnectionStatusBar from './components/ConnectionStatusBar';
 import CalibrationPanel from './components/CalibrationPanel';
+import ThemeToggle from './components/ThemeToggle';
 import { useFirebaseData } from './hooks/useFirebaseData';
 import {
   Activity,
@@ -80,7 +81,7 @@ function App() {
   };
 
   return (
-    <div className="flex min-h-screen bg-[#0f172a] industrial-grid text-slate-200">
+    <div className="flex min-h-screen industrial-grid">
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} status={status} />
 
       {/*
@@ -91,7 +92,7 @@ function App() {
 
         {/* ── Header ─────────────────────────────────────────────── */}
         <header className="flex flex-col gap-3 mb-6 lg:mb-8 pt-2 lg:pt-0">
-          <p className="text-slate-400 font-medium uppercase tracking-[0.2em] text-[9px]">
+          <p className="opacity-40 font-medium uppercase tracking-[0.2em] text-[9px]">
             Energy Guard Society • Node ID: ESP32-Z90
           </p>
 
@@ -108,17 +109,21 @@ function App() {
 
             <div className="flex items-center gap-2 px-3 py-2 glass-card rounded-xl shrink-0">
               <Cpu size={14} className="text-indigo-400" />
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-300">
+              <span className="text-[10px] font-bold uppercase tracking-wider opacity-80">
                 {status.sensorStatus}
               </span>
             </div>
 
-            <button className="p-2.5 glass-card rounded-xl text-slate-400 hover:text-white transition-colors relative shrink-0 ml-auto">
-              <Bell size={18} />
-              {status.theftDetected && (
-                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full pulse-indicator" />
-              )}
-            </button>
+            <div className="ml-auto flex items-center gap-2">
+              <ThemeToggle />
+              
+              <button className="p-2.5 glass-card rounded-xl text-[var(--muted)] hover:text-blue-500 transition-colors relative shrink-0">
+                <Bell size={18} />
+                {status.theftDetected && (
+                  <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full pulse-indicator" />
+                )}
+              </button>
+            </div>
           </div>
         </header>
 
@@ -126,16 +131,16 @@ function App() {
         {renderPage()}
 
         {/* ── Footer ─────────────────────────────────────────────── */}
-        <footer className="mt-10 py-6 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-3">
-          <p className="text-slate-500 text-[11px] font-medium text-center">
+        <footer className="mt-10 py-6 border-t border-[var(--card-border)] flex flex-col md:flex-row items-center justify-between gap-3">
+          <p className="opacity-40 text-[11px] font-medium text-center">
             © 2026 Energy Guard Society. Industrial IoT Surveillance System.
           </p>
-          <div className="flex items-center gap-4 text-[10px] font-black uppercase text-slate-500">
-            <span className="hover:text-blue-400 cursor-pointer transition-colors">Docs</span>
-            <span className="w-1 h-1 bg-slate-700 rounded-full" />
-            <span className="hover:text-blue-400 cursor-pointer transition-colors">Support</span>
-            <span className="w-1 h-1 bg-slate-700 rounded-full" />
-            <span className="hover:text-blue-400 cursor-pointer transition-colors">Privacy</span>
+          <div className="flex items-center gap-4 text-[10px] font-black uppercase opacity-40">
+            <span className="hover:text-blue-500 cursor-pointer transition-colors">Docs</span>
+            <span className="w-1 h-1 bg-[var(--muted)] rounded-full opacity-20" />
+            <span className="hover:text-blue-500 cursor-pointer transition-colors">Support</span>
+            <span className="w-1 h-1 bg-[var(--muted)] rounded-full opacity-20" />
+            <span className="hover:text-blue-500 cursor-pointer transition-colors">Privacy</span>
           </div>
         </footer>
       </main>
@@ -158,7 +163,7 @@ function DashboardPage({
   return (
     <>
       <header className="mb-6">
-        <h1 className="text-2xl lg:text-3xl font-black text-white tracking-tight">DASHBOARD</h1>
+        <h1 className="text-2xl lg:text-3xl font-black tracking-tight">DASHBOARD</h1>
       </header>
 
       {/* Theft alert + ESP32 status */}
@@ -231,17 +236,17 @@ function DashboardPage({
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-8">
         <div className="glass-card p-4 lg:p-6 rounded-2xl">
           <div className="flex items-center justify-between mb-4 lg:mb-6">
-            <h3 className="text-xs lg:text-sm font-bold text-white uppercase tracking-wider">
+            <h3 className="text-xs lg:text-sm font-bold uppercase tracking-wider">
               Live Load Profiling
             </h3>
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-1.5">
                 <div className="w-2 h-2 rounded-full bg-blue-500" />
-                <span className="text-[10px] text-gray-500 font-bold uppercase">Current</span>
+                <span className="text-[10px] opacity-40 font-bold uppercase">Current</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                <span className="text-[10px] text-gray-500 font-bold uppercase">Power</span>
+                <span className="text-[10px] opacity-40 font-bold uppercase">Power</span>
               </div>
             </div>
           </div>

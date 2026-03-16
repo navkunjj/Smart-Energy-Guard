@@ -58,27 +58,27 @@ const ConnectionStatusBar = ({ status, dbConnected, connectionQuality, lastDbPin
 
   const wifiConfig = {
     Connected: {
-      dot: 'bg-emerald-400',
+      dot: 'bg-emerald-500',
       label: 'WiFi Online',
-      labelColor: 'text-emerald-300',
-      icon: <Wifi size={14} className="text-emerald-400" />,
-      ring: 'ring-emerald-500/30',
+      labelColor: 'text-emerald-500',
+      icon: <Wifi size={14} className="text-emerald-500" />,
+      ring: 'ring-emerald-500/20',
       bg: 'bg-emerald-500/10',
     },
     Disconnected: {
-      dot: 'bg-rose-400',
+      dot: 'bg-rose-500',
       label: 'WiFi Offline',
-      labelColor: 'text-rose-300',
-      icon: <WifiOff size={14} className="text-rose-400" />,
-      ring: 'ring-rose-500/30',
+      labelColor: 'text-rose-500',
+      icon: <WifiOff size={14} className="text-rose-500" />,
+      ring: 'ring-rose-500/20',
       bg: 'bg-rose-500/10',
     },
     Checking: {
-      dot: 'bg-amber-400',
+      dot: 'bg-amber-500',
       label: 'WiFi…',
-      labelColor: 'text-amber-300',
-      icon: <Signal size={14} className="text-amber-400" />,
-      ring: 'ring-amber-500/30',
+      labelColor: 'text-amber-500',
+      icon: <Signal size={14} className="text-amber-500" />,
+      ring: 'ring-amber-500/20',
       bg: 'bg-amber-500/10',
     },
   };
@@ -88,35 +88,35 @@ const ConnectionStatusBar = ({ status, dbConnected, connectionQuality, lastDbPin
   // ── DB / Firebase badge ──────────────────────────────────────────────────
   const dbQualityConfig = {
     good: {
-      dot: 'bg-emerald-400',
+      dot: 'bg-emerald-500',
       label: 'DB Connected',
-      labelColor: 'text-emerald-300',
-      icon: <CheckCircle2 size={14} className="text-emerald-400" />,
-      ring: 'ring-emerald-500/30',
+      labelColor: 'text-emerald-500',
+      icon: <CheckCircle2 size={14} className="text-emerald-500" />,
+      ring: 'ring-emerald-500/20',
       bg: 'bg-emerald-500/10',
     },
     poor: {
-      dot: 'bg-yellow-400',
+      dot: 'bg-yellow-500',
       label: 'DB Unstable',
-      labelColor: 'text-yellow-300',
-      icon: <Database size={14} className="text-yellow-400" />,
-      ring: 'ring-yellow-500/30',
+      labelColor: 'text-yellow-500',
+      icon: <Database size={14} className="text-yellow-500" />,
+      ring: 'ring-yellow-500/20',
       bg: 'bg-yellow-500/10',
     },
     checking: {
-      dot: 'bg-blue-400',
+      dot: 'bg-blue-500',
       label: 'Connecting…',
-      labelColor: 'text-blue-300',
-      icon: <Loader2 size={14} className="text-blue-400 animate-spin" />,
-      ring: 'ring-blue-500/30',
+      labelColor: 'text-blue-500',
+      icon: <Loader2 size={14} className="text-blue-500 animate-spin" />,
+      ring: 'ring-blue-500/20',
       bg: 'bg-blue-500/10',
     },
     disconnected: {
-      dot: 'bg-rose-400',
+      dot: 'bg-rose-500',
       label: 'DB Offline',
-      labelColor: 'text-rose-300',
-      icon: <XCircle size={14} className="text-rose-400" />,
-      ring: 'ring-rose-500/30',
+      labelColor: 'text-rose-500',
+      icon: <XCircle size={14} className="text-rose-500" />,
+      ring: 'ring-rose-500/20',
       bg: 'bg-rose-500/10',
     },
   };
@@ -138,7 +138,7 @@ const ConnectionStatusBar = ({ status, dbConnected, connectionQuality, lastDbPin
         </span>
       </div>
 
-      <div className="w-px h-4 bg-white/10" />
+      <div className="w-px h-4 bg-[var(--card-border)]" />
 
       {/* Database badge */}
       <div
@@ -151,20 +151,20 @@ const ConnectionStatusBar = ({ status, dbConnected, connectionQuality, lastDbPin
           {dbCfg.label}
         </span>
         {pingMs !== null && dbConnected && (
-          <span className="text-[9px] font-bold text-slate-500 ml-0.5 tabular-nums hidden md:inline">
+          <span className="text-[9px] font-bold opacity-40 ml-0.5 tabular-nums hidden md:inline">
             {pingMs}ms
           </span>
         )}
       </div>
 
       {/* Session uptime — only on lg+ screens */}
-      <div className="w-px h-4 bg-white/10 hidden lg:block" />
+      <div className="w-px h-4 bg-[var(--card-border)] hidden lg:block" />
       <div
-        className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-700/40 ring-1 ring-white/10"
+        className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[var(--card-bg)] ring-1 ring-[var(--card-border)]"
         title="Session uptime"
       >
-        <Clock size={12} className="text-slate-400" />
-        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest tabular-nums">
+        <Clock size={12} className="opacity-40" />
+        <span className="text-[10px] font-bold opacity-40 uppercase tracking-widest tabular-nums">
           {formatUptime(uptimeSeconds)}
         </span>
       </div>

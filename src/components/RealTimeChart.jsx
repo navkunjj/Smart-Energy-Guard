@@ -51,7 +51,7 @@ const RealTimeChart = ({ data, label, color = 'rgba(59, 130, 246, 0.5)' }) => {
       tooltip: {
         mode: 'index',
         intersect: false,
-        backgroundColor: 'rgba(15, 23, 42, 0.9)',
+        backgroundColor: 'rgba(15, 23, 42, 0.95)',
         titleColor: '#94a3b8',
         bodyColor: '#fff',
         borderColor: 'rgba(255, 255, 255, 0.1)',
@@ -64,10 +64,10 @@ const RealTimeChart = ({ data, label, color = 'rgba(59, 130, 246, 0.5)' }) => {
       y: {
         beginAtZero: true,
         grid: {
-          color: 'rgba(255, 255, 255, 0.05)',
+          color: 'rgba(128, 128, 128, 0.1)',
         },
         ticks: {
-          color: '#64748b',
+          color: 'rgba(148, 163, 184, 0.7)',
           font: { size: 10 },
         },
       },
@@ -76,7 +76,7 @@ const RealTimeChart = ({ data, label, color = 'rgba(59, 130, 246, 0.5)' }) => {
           display: false,
         },
         ticks: {
-          color: '#64748b',
+          color: 'rgba(148, 163, 184, 0.7)',
           font: { size: 10 },
           maxRotation: 0,
           autoSkip: true,
