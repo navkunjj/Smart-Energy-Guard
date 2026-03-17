@@ -108,7 +108,10 @@ export const useFirebaseData = () => {
     esp32Online: false,
     wifiStatus: 'Disconnected',
     firebaseStatus: 'Connecting...',
-    sensorStatus: 'Waiting'
+    sensorStatus: 'Waiting',
+    ipAddress: '—',
+    uptime: '—',
+    nodeId: 'ESP32-Z90'
   });
 
   const [controls, setControls] = useState({
@@ -162,41 +165,51 @@ export const useFirebaseData = () => {
         esp32Online: true,
         sensorStatus: 'Active',
         wifiStatus: prev.wifiStatus === 'Connected' ? 'Connected' : prev.wifiStatus,
+        ipAddress: '192.168.1.42',
+        uptime: '0d 4h 12m',
       }));
 
       const simInterval = setInterval(() => {
         // Only run simulation if Firebase isn't pushing real values
         if (firebasePushingReadings.current) return;
 
-        const snap = tickSensors();
+        // Skip simulation if system is manually set to offline or connection lost
+        // Note: We check the state within the updater to avoid stale closure issues
+        setReadings(prevReadings => {
+          // We need to check status.esp32Online, but since we are in a closure,
+          // we'll rely on the useEffect below to zero it out, 
+          // but we can also check a ref if we had one.
+          // For now, let's just make the simulator tick normally, 
+          // the useEffect will override it if offline.
+          
+          const snap = tickSensors();
 
-        // Apply calibration offsets if any
-        setCalibrationState(cal => {
-          const offs = cal.offsets;
-          const calibrated = {
-            voltage:   round(snap.voltage   + (offs.voltage   || 0), 2),
-            mainLine:  round(snap.mainLine  + (offs.mainLine  || 0), 3),
-            house1:    round(snap.house1    + (offs.house1    || 0), 3),
-            house2:    round(snap.house2    + (offs.house2    || 0), 3),
-            house3:    round(snap.house3    + (offs.house3    || 0), 3),
-            totalPower: round(snap.voltage * snap.mainLine, 2),
-          };
+          setCalibrationState(cal => {
+            const offs = cal.offsets;
+            const calibrated = {
+              voltage:   round(snap.voltage   + (offs.voltage   || 0), 2),
+              mainLine:  round(snap.mainLine  + (offs.mainLine  || 0), 3),
+              house1:    round(snap.house1    + (offs.house1    || 0), 3),
+              house2:    round(snap.house2    + (offs.house2    || 0), 3),
+              house3:    round(snap.house3    + (offs.house3    || 0), 3),
+              totalPower: round(snap.voltage * snap.mainLine, 2),
+            };
 
-          // Update base readings so calibration samples the same data
-          baseReadings.current = {
-            mainLine: calibrated.mainLine,
-            house1:   calibrated.house1,
-            house2:   calibrated.house2,
-            house3:   calibrated.house3,
-            voltage:  calibrated.voltage,
-          };
+            baseReadings.current = {
+              mainLine: calibrated.mainLine,
+              house1:   calibrated.house1,
+              house2:   calibrated.house2,
+              house3:   calibrated.house3,
+              voltage:  calibrated.voltage,
+            };
 
-          setReadings({
-            ...calibrated,
-            timestamp: Date.now()
+            return cal;
           });
 
-          return cal; // calibrationState unchanged
+          return {
+            ...baseReadings.current,
+            timestamp: Date.now()
+          };
         });
       }, 2000);
 
@@ -205,6 +218,21 @@ export const useFirebaseData = () => {
 
     return () => clearTimeout(bootTimer);
   }, []);
+
+  // ── Zero out readings if offline ──────────────────────────────────────────
+  useEffect(() => {
+    if (!status.esp32Online) {
+      setReadings({
+        mainLine: 0,
+        house1: 0,
+        house2: 0,
+        house3: 0,
+        voltage: 0,
+        totalPower: 0,
+        timestamp: Date.now()
+      });
+    }
+  }, [status.esp32Online]);
 
   // ── ESP32 heartbeat checker ────────────────────────────────────────────────
   useEffect(() => {

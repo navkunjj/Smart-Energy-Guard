@@ -101,17 +101,35 @@ const Sidebar = ({ activeTab, setActiveTab, status }) => {
           )}
         </nav>
 
-        {/* Status footer */}
         <div className="p-4 border-t border-[var(--card-border)]">
-          <div className="p-4 rounded-xl bg-[var(--card-bg)] border border-[var(--card-border)]">
-            <div className="flex items-center gap-3 mb-3">
-              <Cpu size={18} className="text-emerald-500" />
-              <span className="text-xs font-semibold">ESP32 Status</span>
-            </div>
-            <div className="flex items-center gap-2">
+          <div className="p-4 rounded-xl bg-[var(--card-bg)] border border-[var(--card-border)] group hover:border-blue-500/30 transition-all duration-300">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <Cpu size={16} className={isOnline ? 'text-blue-400' : 'text-gray-500'} />
+                <span className="text-[11px] font-bold uppercase tracking-wider">ESP32 Core</span>
+              </div>
               <div className={`w-2 h-2 rounded-full ${isOnline ? 'bg-emerald-500 pulse-indicator' : 'bg-rose-500'}`} />
-              <span className="text-[10px] text-gray-400 uppercase tracking-tighter">
-                {isOnline ? 'System Online' : 'System Offline'}
+            </div>
+            
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="text-[9px] opacity-40 uppercase font-bold">Node ID</span>
+                <span className="text-[10px] font-mono font-bold text-blue-400">{status?.nodeId || 'ESP32-Z90'}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-[9px] opacity-40 uppercase font-bold">IP Address</span>
+                <span className="text-[10px] font-mono opacity-80">{isOnline ? (status?.ipAddress || '192.168.1.42') : '—'}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-[9px] opacity-40 uppercase font-bold">Uptime</span>
+                <span className="text-[10px] opacity-80">{isOnline ? (status?.uptime || '0d 0h 0m') : 'Offline'}</span>
+              </div>
+            </div>
+
+            <div className="mt-3 pt-3 border-t border-[var(--card-border)] flex items-center justify-between">
+              <span className="text-[9px] opacity-40 uppercase font-bold">Status</span>
+              <span className={`text-[9px] font-black uppercase tracking-widest ${isOnline ? 'text-emerald-500' : 'text-rose-500'}`}>
+                {isOnline ? 'Online' : 'Offline'}
               </span>
             </div>
           </div>
@@ -174,13 +192,22 @@ const Sidebar = ({ activeTab, setActiveTab, status }) => {
             {menuItems.map(item => (
               <SidebarItem key={item.id} item={item} active={activeTab === item.id} onClick={handleNav} />
             ))}
-            <div className="pt-3 border-t border-white/10 mt-2">
-              <div className="flex items-center gap-2 px-4 py-2">
-                <div className={`w-2 h-2 rounded-full ${isOnline ? 'bg-emerald-500 pulse-indicator' : 'bg-rose-500'}`} />
-                <span className="text-[11px] text-gray-400 uppercase tracking-wider font-medium">
-                  ESP32 {isOnline ? 'Online' : 'Offline'}
-                </span>
+            <div className="pt-3 border-t border-white/10 mt-2 space-y-1">
+              <div className="flex items-center justify-between px-4 py-1">
+                <div className="flex items-center gap-2">
+                  <div className={`w-2 h-2 rounded-full ${isOnline ? 'bg-emerald-500 pulse-indicator' : 'bg-rose-500'}`} />
+                  <span className="text-[11px] text-gray-400 uppercase tracking-wider font-medium">
+                    ESP32 {isOnline ? 'Online' : 'Offline'}
+                  </span>
+                </div>
+                <span className="text-[10px] font-mono font-bold text-blue-400">{status?.nodeId || 'ESP32-Z90'}</span>
               </div>
+              {isOnline && (
+                <div className="px-4 py-1 flex justify-between items-center">
+                  <span className="text-[9px] opacity-40 uppercase font-bold tracking-widest">Network IP</span>
+                  <span className="text-[10px] font-mono opacity-60">{status?.ipAddress || '192.168.1.42'}</span>
+                </div>
+              )}
             </div>
           </div>
         </div>

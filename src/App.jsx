@@ -14,6 +14,7 @@ import ESP32StatusCard from './components/ESP32StatusCard';
 import ConnectionStatusBar from './components/ConnectionStatusBar';
 import CalibrationPanel from './components/CalibrationPanel';
 import ThemeToggle from './components/ThemeToggle';
+import NotificationContainer from './components/NotificationToast';
 import { useFirebaseData } from './hooks/useFirebaseData';
 import {
   Activity,
@@ -32,6 +33,52 @@ function App() {
     dbConnected, connectionQuality, lastDbPing,
     calibrationState, runCalibration,
   } = useFirebaseData();
+
+  const [notifications, setNotifications] = useState([]);
+  const prevControls = React.useRef(controls);
+  const prevTheft = React.useRef(status.theftDetected);
+  const prevOnline = React.useRef(status.esp32Online);
+
+  const addNotification = (message, type = 'info') => {
+    setNotifications(prev => [...prev, { id: Date.now() + Math.random(), message, type }]);
+  };
+
+  const removeNotification = (id) => {
+    setNotifications(prev => prev.filter(n => n.id !== id));
+  };
+
+  // Watch for Control Changes
+  useEffect(() => {
+    Object.keys(controls).forEach(key => {
+      if (prevControls.current && controls[key] !== prevControls.current[key]) {
+        addNotification(`${key.toUpperCase()} state changed to ${controls[key] === 1 ? 'ON' : 'OFF'}`, key);
+      }
+    });
+    prevControls.current = controls;
+  }, [controls]);
+
+  // Watch for Theft Alerts
+  useEffect(() => {
+    if (status.theftDetected && !prevTheft.current) {
+      addNotification(`SECURITY ALERT: Power theft detected at ${status.location}!`, 'theft');
+    }
+    prevTheft.current = status.theftDetected;
+  }, [status.theftDetected, status.location]);
+
+  // Watch for Connection Status
+  useEffect(() => {
+    if (status.esp32Online !== prevOnline.current && prevOnline.current !== undefined) {
+      addNotification(`System ${status.esp32Online ? 'is now ONLINE' : 'has gone OFFLINE'}`, status.esp32Online ? 'success' : 'error');
+    }
+    prevOnline.current = status.esp32Online;
+  }, [status.esp32Online]);
+
+  // Watch for Calibration Completion
+  useEffect(() => {
+    if (calibrationState.phase === 'done') {
+      addNotification('Sensor calibration completed successfully', 'success');
+    }
+  }, [calibrationState.phase]);
 
   const [chartHistory, setChartHistory] = useState({ current: [], power: [] });
 
@@ -54,10 +101,16 @@ function App() {
           <ControlPage
             controls={controls}
             updateControl={updateControl}
-            resetSystem={resetSystem}
+            resetSystem={() => {
+              resetSystem();
+              addNotification('System Reinitialization Signal Sent', 'warning');
+            }}
             status={status}
             readings={readings}
-            sendLCDMessage={sendLCDMessage}
+            sendLCDMessage={(msg) => {
+              sendLCDMessage(msg);
+              addNotification(`LCD Broadcast: "${msg}"`, 'info');
+            }}
           />
         );
       case 'logs':
@@ -71,10 +124,19 @@ function App() {
             logs={logs}
             chartHistory={chartHistory}
             updateControl={updateControl}
-            sendLCDMessage={sendLCDMessage}
-            resetSystem={resetSystem}
+            sendLCDMessage={(msg) => {
+              sendLCDMessage(msg);
+              addNotification(`LCD Broadcast sent: "${msg}"`, 'info');
+            }}
+            resetSystem={() => {
+              resetSystem();
+              addNotification('System reset request sent', 'warning');
+            }}
             calibrationState={calibrationState}
-            runCalibration={runCalibration}
+            runCalibration={() => {
+              runCalibration();
+              addNotification('Self-calibration routine started', 'info');
+            }}
           />
         );
     }
@@ -144,6 +206,11 @@ function App() {
           </div>
         </footer>
       </main>
+
+      <NotificationContainer 
+        notifications={notifications} 
+        removeNotification={removeNotification} 
+      />
     </div>
   );
 }
