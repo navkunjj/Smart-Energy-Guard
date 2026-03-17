@@ -81,6 +81,7 @@ function App() {
   }, [calibrationState.phase]);
 
   const [chartHistory, setChartHistory] = useState({ current: [], power: [] });
+  const [houseHistory, setHouseHistory] = useState({ h1: [], h2: [], h3: [] });
 
   useEffect(() => {
     const time = new Date().toLocaleTimeString([], {
@@ -90,12 +91,17 @@ function App() {
       current: [...prev.current, { time, value: readings.mainLine }].slice(-20),
       power:   [...prev.power,   { time, value: readings.totalPower }].slice(-20),
     }));
-  }, [readings.timestamp, readings.mainLine, readings.totalPower]);
+    setHouseHistory(prev => ({
+      h1: [...prev.h1, { time, value: readings.house1 }].slice(-20),
+      h2: [...prev.h2, { time, value: readings.house2 }].slice(-20),
+      h3: [...prev.h3, { time, value: readings.house3 }].slice(-20),
+    }));
+  }, [readings.timestamp]);
 
   const renderPage = () => {
     switch (activeTab) {
       case 'analytics':
-        return <AnalyticsPage readings={readings} chartHistory={chartHistory} />;
+        return <AnalyticsPage readings={readings} chartHistory={chartHistory} houseHistory={houseHistory} />;
       case 'control':
         return (
           <ControlPage
@@ -233,14 +239,9 @@ function DashboardPage({
         <h1 className="text-2xl lg:text-3xl font-black tracking-tight">DASHBOARD</h1>
       </header>
 
-      {/* Theft alert + ESP32 status */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6 mb-6 lg:mb-8">
-        <div className="lg:col-span-2">
-          <TheftDetectionStatus status={status} onReset={resetSystem} />
-        </div>
-        <div>
-          <ESP32StatusCard status={status} />
-        </div>
+      {/* ESP32 hardware status indicator */}
+      <div className="mb-6 lg:mb-8">
+        <ESP32StatusCard status={status} />
       </div>
 
       {/* Stats grid — 2 cols on phones, 4 on desktop */}
@@ -279,10 +280,7 @@ function DashboardPage({
         />
       </div>
 
-      {/* Calibration panel */}
-      <div className="mb-6 lg:mb-8">
-        <CalibrationPanel calibrationState={calibrationState} runCalibration={runCalibration} />
-      </div>
+
 
       {/* Society map + device controls */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-8 mb-6 lg:mb-8">

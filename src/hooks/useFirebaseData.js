@@ -173,44 +173,30 @@ export const useFirebaseData = () => {
         // Only run simulation if Firebase isn't pushing real values
         if (firebasePushingReadings.current) return;
 
-        // Skip simulation if system is manually set to offline or connection lost
-        // Note: We check the state within the updater to avoid stale closure issues
-        setReadings(prevReadings => {
-          // We need to check status.esp32Online, but since we are in a closure,
-          // we'll rely on the useEffect below to zero it out, 
-          // but we can also check a ref if we had one.
-          // For now, let's just make the simulator tick normally, 
-          // the useEffect will override it if offline.
-          
-          const snap = tickSensors();
-
-          setCalibrationState(cal => {
-            const offs = cal.offsets;
-            const calibrated = {
-              voltage:   round(snap.voltage   + (offs.voltage   || 0), 2),
-              mainLine:  round(snap.mainLine  + (offs.mainLine  || 0), 3),
-              house1:    round(snap.house1    + (offs.house1    || 0), 3),
-              house2:    round(snap.house2    + (offs.house2    || 0), 3),
-              house3:    round(snap.house3    + (offs.house3    || 0), 3),
-              totalPower: round(snap.voltage * snap.mainLine, 2),
-            };
-
-            baseReadings.current = {
-              mainLine: calibrated.mainLine,
-              house1:   calibrated.house1,
-              house2:   calibrated.house2,
-              house3:   calibrated.house3,
-              voltage:  calibrated.voltage,
-            };
-
-            return cal;
-          });
-
-          return {
-            ...baseReadings.current,
-            timestamp: Date.now()
+        const snap = tickSensors();
+        
+        // Get current calibration offsets
+        // We'll use a functional update for setReadings but compute values outside to keep it clean
+        setCalibrationState(cal => {
+          const offs = cal.offsets;
+          const calibrated = {
+            voltage:   round(snap.voltage   + (offs.voltage   || 0), 2),
+            mainLine:  round(snap.mainLine  + (offs.mainLine  || 0), 3),
+            house1:    round(snap.house1    + (offs.house1    || 0), 3),
+            house2:    round(snap.house2    + (offs.house2    || 0), 3),
+            house3:    round(snap.house3    + (offs.house3    || 0), 3),
+            totalPower: round((snap.voltage + (offs.voltage || 0)) * (snap.mainLine + (offs.mainLine || 0)), 2),
           };
+
+          // Update readings and base reference
+          setReadings({ ...calibrated, timestamp: Date.now() });
+          baseReadings.current = { ...calibrated };
+          
+          return cal;
         });
+
+        // Keep status alive during simulation
+        setStatus(prev => ({ ...prev, esp32LastSeen: Date.now(), esp32Online: true }));
       }, 2000);
 
       return () => clearInterval(simInterval);
@@ -229,6 +215,14 @@ export const useFirebaseData = () => {
         house3: 0,
         voltage: 0,
         totalPower: 0,
+        timestamp: Date.now()
+      });
+    } else {
+      // If we just came online, restore from baseReadings immediately
+      // so the UI doesn't flicker on 0 before the next tick
+      setReadings({
+        ...baseReadings.current,
+        totalPower: round(baseReadings.current.voltage * baseReadings.current.mainLine, 2),
         timestamp: Date.now()
       });
     }
@@ -323,6 +317,7 @@ export const useFirebaseData = () => {
             timestamp: Date.now(),
           };
           setReadings(v);
+          setStatus(prev => ({ ...prev, esp32LastSeen: Date.now(), esp32Online: true }));
           baseReadings.current = {
             mainLine: v.mainLine,
             house1:   v.house1,
@@ -357,6 +352,8 @@ export const useFirebaseData = () => {
           setStatus(prev => ({
             ...prev,
             ...data,
+            esp32LastSeen: Date.now(),
+            esp32Online: true,
             ...(normalizedWifi !== undefined ? { wifiStatus: normalizedWifi } : {}),
           }));
         }
@@ -374,6 +371,7 @@ export const useFirebaseData = () => {
         if (data) {
           const logList = Object.keys(data)
             .map(key => ({ id: key, ...data[key] }))
+            .filter(log => !log.event?.startsWith('LCD:'))
             .reverse();
           setLogs(logList.slice(0, 50));
         }
@@ -470,11 +468,8 @@ export const useFirebaseData = () => {
   };
 
   const sendLCDMessage = (message) => {
-    const newLog = { id: Date.now().toString(), event: `LCD: "${message}"`, timestamp: Date.now(), type: 'info' };
-    setLogs(prev => [newLog, ...prev].slice(0, 50));
     try {
       set(ref(db, 'lcd/message'), message);
-      push(ref(db, 'logs'), { event: newLog.event, timestamp: serverTimestamp(), type: 'info' });
     } catch (e) {}
   };
 

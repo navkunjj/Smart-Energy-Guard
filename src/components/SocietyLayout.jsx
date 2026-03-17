@@ -86,7 +86,7 @@ const SocietyLayout = ({ readings, status }) => {
         <div className="px-3 py-2 md:px-4 md:py-2 rounded-xl bg-[var(--card-bg)] border border-[var(--card-border)] flex items-center gap-2">
           <Activity size={14} className="text-blue-400" />
           <span className="text-[10px] md:text-xs opacity-60">Total Load:</span>
-          <span className="text-[11px] md:text-xs font-bold">{readings.totalPower}kW</span>
+          <span className="text-[11px] md:text-xs font-bold">{readings.totalPower}W</span>
         </div>
       </div>
     </div>

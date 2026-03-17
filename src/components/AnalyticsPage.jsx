@@ -34,18 +34,7 @@ const barOptions = {
   plugins: { ...lineOptions.plugins, legend: { display: false } },
 };
 
-const AnalyticsPage = ({ readings, chartHistory }) => {
-  const [houseHistory, setHouseHistory] = useState({ h1: [], h2: [], h3: [] });
-
-  useEffect(() => {
-    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    setHouseHistory(prev => ({
-      h1: [...prev.h1, { time, value: readings.house1 }].slice(-20),
-      h2: [...prev.h2, { time, value: readings.house2 }].slice(-20),
-      h3: [...prev.h3, { time, value: readings.house3 }].slice(-20),
-    }));
-  }, [readings.timestamp]);
-
+const AnalyticsPage = ({ readings, chartHistory, houseHistory }) => {
   const labels = houseHistory.h1.map(d => d.time);
 
   const multiLineData = {
@@ -91,7 +80,7 @@ const AnalyticsPage = ({ readings, chartHistory }) => {
   const statCards = [
     { label: 'Total Load Current', value: `${readings.mainLine}`, unit: 'A', icon: Zap, color: 'blue', trend: +1.2 },
     { label: 'Grid Voltage', value: `${readings.voltage}`, unit: 'V', icon: Activity, color: 'purple', trend: -0.3 },
-    { label: 'Network Power', value: `${readings.totalPower}`, unit: 'kW', icon: TrendingUp, color: 'green', trend: +2.1 },
+    { label: 'Network Power', value: `${readings.totalPower}`, unit: 'W', icon: TrendingUp, color: 'green', trend: +2.1 },
     { label: 'Sum of Houses', value: `${totalCurrent.toFixed(2)}`, unit: 'A', icon: Home, color: 'orange', trend: 0 },
   ];
 
@@ -182,7 +171,7 @@ const AnalyticsPage = ({ readings, chartHistory }) => {
               data={{
                 labels: (chartHistory.power || []).map(d => d.time),
                 datasets: [{
-                  label: 'Total Power (kW)',
+                  label: 'Total Power (W)',
                   data: (chartHistory.power || []).map(d => d.value),
                   borderColor: '#10b981',
                   backgroundColor: 'rgba(16,185,129,0.1)',

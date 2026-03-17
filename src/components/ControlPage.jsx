@@ -141,7 +141,7 @@ const ControlPage = ({ controls, updateControl, resetSystem, status, readings, s
               {[
                 { label: 'Main Line', value: `${readings.mainLine} A`, color: 'text-blue-500' },
                 { label: 'Voltage', value: `${readings.voltage} V`, color: 'text-purple-500' },
-                { label: 'Total Power', value: `${readings.totalPower} kW`, color: 'text-emerald-500' },
+                { label: 'Total Power', value: `${readings.totalPower} W`, color: 'text-emerald-500' },
                 { label: 'House 1', value: `${readings.house1} A`, color: 'text-blue-400' },
                 { label: 'House 2', value: `${readings.house2} A`, color: 'text-purple-400' },
                 { label: 'House 3', value: `${readings.house3} A`, color: 'text-emerald-400' },
