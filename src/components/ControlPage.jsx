@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Power, Bell, Lightbulb, RotateCcw, MessageSquareText, Send, Wifi, Database, Cpu, ShieldCheck, ShieldAlert, Activity } from 'lucide-react';
-import LCDMessageSender from './LCDMessageSender';
+
 
 const ToggleSwitch = ({ isOn, onChange }) => (
   <button
@@ -11,7 +11,7 @@ const ToggleSwitch = ({ isOn, onChange }) => (
   </button>
 );
 
-const ControlPage = ({ controls, updateControl, resetSystem, status, readings, sendLCDMessage }) => {
+const ControlPage = ({ controls, updateControl, resetSystem, status, readings }) => {
   const devices = [
     {
       id: 'led',
@@ -102,12 +102,6 @@ const ControlPage = ({ controls, updateControl, resetSystem, status, readings, s
                 Reinitialize
               </button>
             </div>
-          </div>
-
-          {/* LCD Message Sender */}
-          <div className="mt-2">
-            <h2 className="text-xs font-black opacity-40 uppercase tracking-widest mb-4">LCD Broadcast</h2>
-            <LCDMessageSender onSend={sendLCDMessage} />
           </div>
         </div>
 

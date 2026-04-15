@@ -34,15 +34,15 @@ const barOptions = {
   plugins: { ...lineOptions.plugins, legend: { display: false } },
 };
 
-const AnalyticsPage = ({ readings, chartHistory, houseHistory }) => {
-  const labels = houseHistory.h1.map(d => d.time);
+const AnalyticsPage = ({ readings, history = [] }) => {
+  const labels = history.map(d => d.time);
 
   const multiLineData = {
     labels,
     datasets: [
-      { label: 'House 1', data: houseHistory.h1.map(d => d.value), borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.08)', fill: true, tension: 0.4, pointRadius: 2, borderWidth: 2 },
-      { label: 'House 2', data: houseHistory.h2.map(d => d.value), borderColor: '#a855f7', backgroundColor: 'rgba(168,85,247,0.08)', fill: true, tension: 0.4, pointRadius: 2, borderWidth: 2 },
-      { label: 'House 3', data: houseHistory.h3.map(d => d.value), borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.08)', fill: true, tension: 0.4, pointRadius: 2, borderWidth: 2 },
+      { label: 'House 1', data: history.map(d => d.h1), borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.08)', fill: true, tension: 0.4, pointRadius: 2, borderWidth: 2 },
+      { label: 'House 2', data: history.map(d => d.h2), borderColor: '#a855f7', backgroundColor: 'rgba(168,85,247,0.08)', fill: true, tension: 0.4, pointRadius: 2, borderWidth: 2 },
+      { label: 'House 3', data: history.map(d => d.h3), borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.08)', fill: true, tension: 0.4, pointRadius: 2, borderWidth: 2 },
     ],
   };
 
@@ -78,9 +78,9 @@ const AnalyticsPage = ({ readings, chartHistory, houseHistory }) => {
   const totalCurrent = readings.house1 + readings.house2 + readings.house3;
 
   const statCards = [
-    { label: 'Total Load Current', value: `${readings.mainLine}`, unit: 'A', icon: Zap, color: 'blue', trend: +1.2 },
-    { label: 'Grid Voltage', value: `${readings.voltage}`, unit: 'V', icon: Activity, color: 'purple', trend: -0.3 },
-    { label: 'Network Power', value: `${readings.totalPower}`, unit: 'W', icon: TrendingUp, color: 'green', trend: +2.1 },
+    { label: 'Total Load Current', value: `${readings.mainLine}`, unit: 'A', icon: Zap, color: 'blue', trend: 0 },
+    { label: 'Grid Voltage', value: `${readings.voltage}`, unit: 'V', icon: Activity, color: 'purple', trend: 0 },
+    { label: 'Network Power', value: `${readings.totalPower}`, unit: 'W', icon: TrendingUp, color: 'green', trend: 0 },
     { label: 'Sum of Houses', value: `${totalCurrent.toFixed(2)}`, unit: 'A', icon: Home, color: 'orange', trend: 0 },
   ];
 
@@ -118,15 +118,6 @@ const AnalyticsPage = ({ readings, chartHistory, houseHistory }) => {
                   <Icon size={20} />
                 </div>
               </div>
-              {card.trend !== 0 && (
-                <div className="mt-3 flex items-center gap-2">
-                  <div className={`flex items-center text-[10px] font-bold px-2 py-0.5 rounded-full ${card.trend > 0 ? 'bg-emerald-500/20 text-emerald-500' : 'bg-rose-500/20 text-rose-500'}`}>
-                    {card.trend > 0 ? <TrendingUp size={12} className="mr-1" /> : <TrendingDown size={12} className="mr-1" />}
-                    {Math.abs(card.trend)}%
-                  </div>
-                  <span className="text-[10px] opacity-40 uppercase font-medium">vs last hour</span>
-                </div>
-              )}
             </div>
           );
         })}
@@ -158,23 +149,23 @@ const AnalyticsPage = ({ readings, chartHistory, houseHistory }) => {
       {/* Charts Row 2 */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="glass-card p-6 rounded-2xl">
-          <h3 className="text-sm font-bold uppercase tracking-wider mb-6">Comparative House Load (Current)</h3>
+          <h3 className="text-sm font-bold uppercase tracking-wider mb-6">Comparative House Load</h3>
           <div className="h-56">
             <Bar data={barData} options={barOptions} />
           </div>
         </div>
 
         <div className="glass-card p-6 rounded-2xl">
-          <h3 className="text-sm font-bold uppercase tracking-wider mb-6">Main Line Power Trend</h3>
+          <h3 className="text-sm font-bold uppercase tracking-wider mb-6">Main Line Current Trend</h3>
           <div className="h-56">
             <Line
               data={{
-                labels: (chartHistory.power || []).map(d => d.time),
+                labels,
                 datasets: [{
-                  label: 'Total Power (W)',
-                  data: (chartHistory.power || []).map(d => d.value),
-                  borderColor: '#10b981',
-                  backgroundColor: 'rgba(16,185,129,0.1)',
+                  label: 'Main Current (A)',
+                  data: history.map(d => d.main),
+                  borderColor: '#f43f5e',
+                  backgroundColor: 'rgba(244,63,94,0.1)',
                   fill: true, tension: 0.4, pointRadius: 2, borderWidth: 2,
                 }],
               }}

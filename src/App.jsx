@@ -6,7 +6,7 @@ import SocietyLayout from './components/SocietyLayout';
 import DeviceControls from './components/DeviceControls';
 import RealTimeChart from './components/RealTimeChart';
 import EventLog from './components/EventLog';
-import LCDMessageSender from './components/LCDMessageSender';
+
 import AnalyticsPage from './components/AnalyticsPage';
 import ControlPage from './components/ControlPage';
 import LogsPage from './components/LogsPage';
@@ -15,6 +15,9 @@ import ConnectionStatusBar from './components/ConnectionStatusBar';
 import CalibrationPanel from './components/CalibrationPanel';
 import ThemeToggle from './components/ThemeToggle';
 import NotificationContainer from './components/NotificationToast';
+import StatusGrid from './components/StatusGrid';
+import CurrentComparisonChart from './components/CurrentComparisonChart';
+import LoginScreen from './components/LoginScreen';
 import { useFirebaseData } from './hooks/useFirebaseData';
 import {
   Activity,
@@ -26,97 +29,52 @@ import {
 } from 'lucide-react';
 
 function App() {
+  const [authed, setAuthed] = useState(() => sessionStorage.getItem('eg_auth') === 'true');
+
+  if (!authed) {
+    return <LoginScreen onLogin={() => setAuthed(true)} />;
+  }
+
+  return <AuthenticatedApp />;
+}
+
+function AuthenticatedApp() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const {
     readings, status, controls, logs,
-    updateControl, sendLCDMessage, resetSystem,
+    updateControl, resetSystem,
     dbConnected, connectionQuality, lastDbPing,
     calibrationState, runCalibration,
   } = useFirebaseData();
 
-  const [notifications, setNotifications] = useState([]);
-  const prevControls = React.useRef(controls);
-  const prevTheft = React.useRef(status.theftDetected);
-  const prevOnline = React.useRef(status.esp32Online);
 
-  const addNotification = (message, type = 'info') => {
-    setNotifications(prev => [...prev, { id: Date.now() + Math.random(), message, type }]);
-  };
-
-  const removeNotification = (id) => {
-    setNotifications(prev => prev.filter(n => n.id !== id));
-  };
-
-  // Watch for Control Changes
-  useEffect(() => {
-    Object.keys(controls).forEach(key => {
-      if (prevControls.current && controls[key] !== prevControls.current[key]) {
-        addNotification(`${key.toUpperCase()} state changed to ${controls[key] === 1 ? 'ON' : 'OFF'}`, key);
-      }
-    });
-    prevControls.current = controls;
-  }, [controls]);
-
-  // Watch for Theft Alerts
-  useEffect(() => {
-    if (status.theftDetected && !prevTheft.current) {
-      addNotification(`SECURITY ALERT: Power theft detected at ${status.location}!`, 'theft');
-    }
-    prevTheft.current = status.theftDetected;
-  }, [status.theftDetected, status.location]);
-
-  // Watch for Connection Status
-  useEffect(() => {
-    if (status.esp32Online !== prevOnline.current && prevOnline.current !== undefined) {
-      addNotification(`System ${status.esp32Online ? 'is now ONLINE' : 'has gone OFFLINE'}`, status.esp32Online ? 'success' : 'error');
-    }
-    prevOnline.current = status.esp32Online;
-  }, [status.esp32Online]);
-
-  // Watch for Calibration Completion
-  useEffect(() => {
-    if (calibrationState.phase === 'done') {
-      addNotification('Sensor calibration completed successfully', 'success');
-    }
-  }, [calibrationState.phase]);
-
-  const [chartHistory, setChartHistory] = useState({ current: [], power: [] });
-  const [houseHistory, setHouseHistory] = useState({ h1: [], h2: [], h3: [] });
+  const [history, setHistory] = useState([]);
 
   useEffect(() => {
-    const time = new Date().toLocaleTimeString([], {
-      hour: '2-digit', minute: '2-digit', second: '2-digit'
-    });
-    setChartHistory(prev => ({
-      current: [...prev.current, { time, value: readings.mainLine }].slice(-20),
-      power:   [...prev.power,   { time, value: readings.totalPower }].slice(-20),
-    }));
-    setHouseHistory(prev => ({
-      h1: [...prev.h1, { time, value: readings.house1 }].slice(-20),
-      h2: [...prev.h2, { time, value: readings.house2 }].slice(-20),
-      h3: [...prev.h3, { time, value: readings.house3 }].slice(-20),
-    }));
+    if (!readings.timestamp) return;
+    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    setHistory(prev => [...prev, {
+      time,
+      main: readings.mainLine,
+      h1: readings.house1,
+      h2: readings.house2,
+      h3: readings.house3,
+    }].slice(-20));
   }, [readings.timestamp]);
 
   const renderPage = () => {
     switch (activeTab) {
       case 'analytics':
-        return <AnalyticsPage readings={readings} chartHistory={chartHistory} houseHistory={houseHistory} />;
+        return <AnalyticsPage readings={readings} history={history} />;
       case 'control':
         return (
           <ControlPage
             controls={controls}
             updateControl={updateControl}
-            resetSystem={() => {
-              resetSystem();
-              addNotification('System Reinitialization Signal Sent', 'warning');
-            }}
+            resetSystem={resetSystem}
             status={status}
             readings={readings}
-            sendLCDMessage={(msg) => {
-              sendLCDMessage(msg);
-              addNotification(`LCD Broadcast: "${msg}"`, 'info');
-            }}
+
           />
         );
       case 'logs':
@@ -128,21 +86,12 @@ function App() {
             status={status}
             controls={controls}
             logs={logs}
-            chartHistory={chartHistory}
+            history={history}
             updateControl={updateControl}
-            sendLCDMessage={(msg) => {
-              sendLCDMessage(msg);
-              addNotification(`LCD Broadcast sent: "${msg}"`, 'info');
-            }}
-            resetSystem={() => {
-              resetSystem();
-              addNotification('System reset request sent', 'warning');
-            }}
+
+            resetSystem={resetSystem}
             calibrationState={calibrationState}
-            runCalibration={() => {
-              runCalibration();
-              addNotification('Self-calibration routine started', 'info');
-            }}
+            runCalibration={runCalibration}
           />
         );
     }
@@ -213,10 +162,7 @@ function App() {
         </footer>
       </main>
 
-      <NotificationContainer 
-        notifications={notifications} 
-        removeNotification={removeNotification} 
-      />
+
     </div>
   );
 }
@@ -225,99 +171,45 @@ function App() {
    Dashboard page
    ═══════════════════════════════════════════════════════════════════ */
 function DashboardPage({
-  readings, status, controls, logs, chartHistory,
-  updateControl, sendLCDMessage, resetSystem,
+  readings, status, controls, logs, history,
+  updateControl, resetSystem,
   calibrationState, runCalibration
 }) {
-  const batteryPct = Math.max(0, Math.min(100,
-    Math.round(((readings.voltage - 6.0) / (8.4 - 6.0)) * 100)
-  ));
-
   return (
     <>
-      <header className="mb-6">
+      <header className="mb-6 flex items-center justify-between">
         <h1 className="text-2xl lg:text-3xl font-black tracking-tight">DASHBOARD</h1>
+        <div className="flex items-center gap-2">
+          <span className={`w-2.5 h-2.5 rounded-full ${status.esp32Online ? 'bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.6)]' : 'bg-rose-500'}`} />
+          <span className="text-[10px] font-black uppercase tracking-widest opacity-40">
+            {status.location || 'Node'}
+          </span>
+        </div>
       </header>
 
-      {/* ESP32 hardware status indicator */}
-      <div className="mb-6 lg:mb-8">
-        <ESP32StatusCard status={status} />
+      {/* Compact Status + House Currents */}
+      <div className="mb-6">
+        <StatusGrid status={status} readings={readings} />
       </div>
 
-      {/* Stats grid — 2 cols on phones, 4 on desktop */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-6 mb-6 lg:mb-8">
-        <LiveMonitoringCard
-          title="Battery Voltage"
-          value={readings.voltage ?? 0}
-          unit="V DC"
-          icon={Zap}
-          color="blue"
-          liveFlash
-        />
-        <LiveMonitoringCard
-          title="Total Current"
-          value={readings.mainLine ? (readings.mainLine * 1000).toFixed(0) : 0}
-          unit="mA"
-          icon={Waves}
-          color="purple"
-          liveFlash
-        />
-        <LiveMonitoringCard
-          title="Output Power"
-          value={readings.totalPower ?? 0}
-          unit="W"
-          icon={Activity}
-          color="green"
-          liveFlash
-        />
-        <LiveMonitoringCard
-          title="Battery Level"
-          value={batteryPct}
-          unit="%"
-          icon={BatteryMedium}
-          color="orange"
-          liveFlash
-        />
-      </div>
-
-
-
-      {/* Society map + device controls */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-8 mb-6 lg:mb-8">
-        <div className="lg:col-span-2">
-          <SocietyLayout readings={readings} status={status} />
-        </div>
-        <div className="space-y-4 lg:space-y-8">
-          <DeviceControls
-            controls={controls}
-            updateControl={updateControl}
-            resetSystem={resetSystem}
-          />
-          <LCDMessageSender onSend={sendLCDMessage} />
-        </div>
-      </div>
-
-      {/* Charts + event log */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-8">
+      {/* Current Comparison Chart + Event Log */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
         <div className="glass-card p-4 lg:p-6 rounded-2xl">
-          <div className="flex items-center justify-between mb-4 lg:mb-6">
-            <h3 className="text-xs lg:text-sm font-bold uppercase tracking-wider">
-              Live Load Profiling
-            </h3>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-[10px] font-black uppercase tracking-widest opacity-40">Current Comparison</h3>
             <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1.5">
-                <div className="w-2 h-2 rounded-full bg-blue-500" />
-                <span className="text-[10px] opacity-40 font-bold uppercase">Current</span>
+              <div className="flex items-center gap-1">
+                <div className="w-2 h-2 rounded-full bg-rose-500" />
+                <span className="text-[9px] opacity-30 font-bold uppercase">Main Grid</span>
               </div>
-              <div className="flex items-center gap-1.5">
-                <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                <span className="text-[10px] opacity-40 font-bold uppercase">Power</span>
+              <div className="flex items-center gap-1">
+                <div className="w-2 h-2 rounded-full bg-blue-500" />
+                <span className="text-[9px] opacity-30 font-bold uppercase">Houses Total</span>
               </div>
             </div>
           </div>
-          <div className="space-y-4">
-            <RealTimeChart data={chartHistory.current} label="Main Current (A)" color="rgba(59, 130, 246, 0.2)" />
-            <RealTimeChart data={chartHistory.power}   label="Total Power (W)"  color="rgba(16, 185, 129, 0.2)" />
+          <div className="h-56">
+            <CurrentComparisonChart data={history} />
           </div>
         </div>
 
