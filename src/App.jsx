@@ -6,10 +6,10 @@ import SocietyLayout from './components/SocietyLayout';
 import DeviceControls from './components/DeviceControls';
 import RealTimeChart from './components/RealTimeChart';
 import EventLog from './components/EventLog';
+import HistoryLog from './components/HistoryLog';
 
 import AnalyticsPage from './components/AnalyticsPage';
 import ControlPage from './components/ControlPage';
-import LogsPage from './components/LogsPage';
 import ESP32StatusCard from './components/ESP32StatusCard';
 import ConnectionStatusBar from './components/ConnectionStatusBar';
 import CalibrationPanel from './components/CalibrationPanel';
@@ -51,16 +51,21 @@ function AuthenticatedApp() {
   const [history, setHistory] = useState([]);
 
   useEffect(() => {
-    if (!readings.timestamp) return;
+    if (!readings.timestamp || !status.esp32Online) return;
     const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    setHistory(prev => [...prev, {
-      time,
-      main: readings.mainLine,
-      h1: readings.house1,
-      h2: readings.house2,
-      h3: readings.house3,
-    }].slice(-20));
-  }, [readings.timestamp]);
+    setHistory(prev => {
+      const totalHouses = Number((readings.house1 + readings.house2 + readings.house3).toFixed(3));
+      return [...prev, {
+        time,
+        main: readings.mainLine,
+        h1: readings.house1,
+        h2: readings.house2,
+        h3: readings.house3,
+        total: totalHouses,
+        voltage: readings.voltage,
+      }].slice(-20);
+    });
+  }, [readings.timestamp, status.esp32Online]);
 
   const renderPage = () => {
     switch (activeTab) {
@@ -77,8 +82,12 @@ function AuthenticatedApp() {
 
           />
         );
-      case 'logs':
-        return <LogsPage logs={logs} />;
+      case 'history':
+        return (
+          <div className="h-[calc(100vh-140px)] w-full max-w-4xl mx-auto">
+            <HistoryLog history={history} />
+          </div>
+        );
       default:
         return (
           <DashboardPage
@@ -182,7 +191,7 @@ function DashboardPage({
         <div className="flex items-center gap-2">
           <span className={`w-2.5 h-2.5 rounded-full ${status.esp32Online ? 'bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.6)]' : 'bg-rose-500'}`} />
           <span className="text-[10px] font-black uppercase tracking-widest opacity-40">
-            {status.location || 'Node'}
+            {status.esp32Online ? 'Online' : 'Offline'}
           </span>
         </div>
       </header>
@@ -213,7 +222,7 @@ function DashboardPage({
           </div>
         </div>
 
-        <EventLog logs={logs} />
+        <HistoryLog history={history} />
       </div>
     </>
   );

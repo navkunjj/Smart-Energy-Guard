@@ -1,24 +1,24 @@
-import React, { useState } from 'react';
-import { ShieldCheck, Lock, Eye, EyeOff, Zap } from 'lucide-react';
+import React, { useState } from "react";
+import { ShieldCheck, Lock, Eye, EyeOff, Zap } from "lucide-react";
 
-const ADMIN_PASSWORD = 'admin123';
+const ADMIN_PASSWORD = "energyguard";
 
 const LoginScreen = ({ onLogin }) => {
-  const [password, setPassword] = useState('');
+  const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [shaking, setShaking] = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (password === ADMIN_PASSWORD) {
-      sessionStorage.setItem('eg_auth', 'true');
+      sessionStorage.setItem("eg_auth", "true");
       onLogin();
     } else {
-      setError('Invalid credentials');
+      setError("Invalid credentials");
       setShaking(true);
       setTimeout(() => setShaking(false), 500);
-      setTimeout(() => setError(''), 3000);
+      setTimeout(() => setError(""), 3000);
     }
   };
 
@@ -29,7 +29,9 @@ const LoginScreen = ({ onLogin }) => {
         <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-blue-500/5 rounded-full blur-[120px]" />
       </div>
 
-      <div className={`w-full max-w-sm relative z-10 ${shaking ? 'animate-[shake_0.5s_ease-in-out]' : ''}`}>
+      <div
+        className={`w-full max-w-sm relative z-10 ${shaking ? "animate-[shake_0.5s_ease-in-out]" : ""}`}
+      >
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-blue-500/20 to-indigo-500/20 border border-blue-500/20 flex items-center justify-center">
@@ -42,10 +44,15 @@ const LoginScreen = ({ onLogin }) => {
         </div>
 
         {/* Login Card */}
-        <form onSubmit={handleSubmit} className="glass-card rounded-2xl p-6 border border-white/5 space-y-5">
+        <form
+          onSubmit={handleSubmit}
+          className="glass-card rounded-2xl p-6 border border-white/5 space-y-5"
+        >
           <div className="flex items-center gap-2 mb-1">
             <ShieldCheck size={16} className="text-blue-400 opacity-60" />
-            <span className="text-[10px] font-black uppercase tracking-widest opacity-40">Secure Access</span>
+            <span className="text-[10px] font-black uppercase tracking-widest opacity-40">
+              Secure Access
+            </span>
           </div>
 
           {/* Password Field */}
@@ -54,9 +61,12 @@ const LoginScreen = ({ onLogin }) => {
               <Lock size={16} className="opacity-30" />
             </div>
             <input
-              type={showPass ? 'text' : 'password'}
+              type={showPass ? "text" : "password"}
               value={password}
-              onChange={(e) => { setPassword(e.target.value); setError(''); }}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                setError("");
+              }}
               placeholder="Enter admin password"
               autoFocus
               className="w-full pl-10 pr-12 py-3 rounded-xl bg-white/5 border border-white/10 text-sm font-medium placeholder:opacity-30 focus:outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/20 transition-all"
@@ -72,7 +82,9 @@ const LoginScreen = ({ onLogin }) => {
 
           {/* Error */}
           {error && (
-            <p className="text-rose-400 text-xs font-bold text-center animate-pulse">{error}</p>
+            <p className="text-rose-400 text-xs font-bold text-center animate-pulse">
+              {error}
+            </p>
           )}
 
           {/* Submit */}

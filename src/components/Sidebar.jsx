@@ -17,7 +17,7 @@ const menuItems = [
   { id: 'dashboard',  label: 'Monitor',       icon: LayoutDashboard },
   { id: 'analytics',  label: 'Analytics',     icon: Activity },
   { id: 'control',    label: 'Device Control', icon: Settings },
-  { id: 'logs',       label: 'Event Logs',    icon: History },
+  { id: 'history',    label: 'System History', icon: History },
 ];
 
 /* ── Mobile bottom bar tab ──────────────────────────────────────── */

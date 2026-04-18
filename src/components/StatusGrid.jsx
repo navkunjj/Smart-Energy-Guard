@@ -37,7 +37,7 @@ const StatusGrid = ({ status, readings }) => {
     { label: 'IP', value: status.ip || '—', icon: Globe },
     { label: 'Signal', value: `${status.wifiSignal || 0} dBm`, icon: Signal },
     { label: 'Uptime', value: typeof status.uptime === 'number' ? `${Math.floor(status.uptime / 60)}m ${status.uptime % 60}s` : '—', icon: Clock },
-    { label: 'Location', value: status.location || '—', icon: MapPin },
+
     { label: 'WiFi', value: status.wifiStatus || '—', icon: Wifi },
   ];
 
