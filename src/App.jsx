@@ -117,7 +117,7 @@ function AuthenticatedApp() {
         {/* ── Header ─────────────────────────────────────────────── */}
         <header className="flex flex-col gap-3 mb-6 lg:mb-8 pt-2 lg:pt-0">
           <p className="opacity-40 font-medium uppercase tracking-[0.2em] text-[9px]">
-            Energy Guard Society • Node ID: ESP32-Z90
+            SMART ENERGY GUARD • Node ID: ESP32-Z90
           </p>
 
           {/* Status bar row — scrollable on very small screens */}

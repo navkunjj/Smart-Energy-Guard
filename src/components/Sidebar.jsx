@@ -12,6 +12,7 @@ import {
   Smartphone,
   GitBranch,
 } from 'lucide-react';
+import Logo from './Logo';
 import { usePWAInstall } from '../hooks/usePWAInstall';
 
 const menuItems = [
@@ -76,14 +77,8 @@ const Sidebar = ({ activeTab, setActiveTab, status }) => {
       {/* ── Desktop sidebar (hidden on mobile) ─────────────────── */}
       <aside className="hidden lg:flex w-64 h-screen glass-card fixed left-0 top-0 flex-col z-50">
         {/* Logo */}
-        <div className="p-6 flex items-center gap-3 border-b border-[var(--card-border)]">
-          <div className="p-2 bg-blue-600 rounded-lg">
-            <Zap className="text-white" size={24} />
-          </div>
-          <div>
-            <h1 className="text-sm font-bold leading-none">ENERGY GUARD</h1>
-            <p className="text-[10px] opacity-60 mt-1 uppercase tracking-wider">Smart Grid Detection</p>
-          </div>
+        <div className="p-6 border-b border-[var(--card-border)]">
+          <Logo size={36} />
         </div>
 
         {/* Nav */}
@@ -143,16 +138,8 @@ const Sidebar = ({ activeTab, setActiveTab, status }) => {
       </aside>
 
       {/* ── Mobile top navbar ───────────────────────────────────── */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 py-3 glass-card border-b border-[var(--card-border)]">
-        <div className="flex items-center gap-2">
-          <div className="p-1.5 bg-blue-600 rounded-lg">
-            <Zap className="text-white" size={18} />
-          </div>
-          <div>
-            <p className="text-xs font-bold leading-none">ENERGY GUARD</p>
-            <p className="text-[9px] opacity-60 uppercase tracking-wider">Smart Grid Detection</p>
-          </div>
-        </div>
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 py-2 glass-card border-b border-[var(--card-border)]">
+        <Logo size={32} />
 
         <div className="flex items-center gap-2">
           {/* ESP32 live dot */}

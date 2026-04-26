@@ -1,0 +1,32 @@
+<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="iconGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stopColor="#0F172A" />
+      <stop offset="100%" stopColor="#10B981" />
+    </linearGradient>
+  </defs>
+  
+  {/* Circular Border */}
+  <path 
+    d="M50 10 A40 40 0 1 1 50 90 A40 40 0 1 1 50 10" 
+    stroke="url(#iconGradient)" 
+    strokeWidth="6" 
+    strokeLinecap="round"
+  />
+  
+  {/* Lightning Bolt */}
+  <path 
+    d="M55 22 L35 52 H50 L45 78 L65 48 H50 Z" 
+    fill="url(#iconGradient)" 
+  />
+  
+  {/* The Leaf */}
+  <path 
+    d="M60 65 C75 65 88 52 88 40 C75 40 60 50 60 65" 
+    fill="#10B981" 
+  />
+
+  {/* Decorative Dots */}
+  <circle cx="35" cy="80" r="3.5" fill="#0F172A" />
+  <circle cx="26" cy="74" r="4.5" fill="#0F172A" />
+</svg>
