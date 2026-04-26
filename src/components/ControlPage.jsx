@@ -38,15 +38,6 @@ const ControlPage = ({ controls, updateControl, resetSystem, status, readings, t
       activeClass: 'border-blue-500/40 bg-blue-500/5',
       iconClass: 'text-blue-500 bg-blue-500/10 border-blue-500/20',
     },
-    {
-      id: 'alarm',
-      label: 'Theft Alarm',
-      desc: 'Audible alarm for unauthorized power access',
-      icon: Bell,
-      color: 'rose',
-      activeClass: 'border-rose-500/40 bg-rose-500/5',
-      iconClass: 'text-rose-500 bg-rose-500/10 border-rose-500/20',
-    },
   ];
 
   const theftStatus = [

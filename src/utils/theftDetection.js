@@ -17,10 +17,10 @@ export const isWithinTolerance = (a, b, tol = TOLERANCE) =>
  * @param {{ CS1: number, CS2: number, CS3: number, CS4: number, PCS1: number, PCS2: number }} sensors
  * @returns {{ mainTheft: boolean, pole1Theft: boolean, pole2Theft: boolean, anyTheft: boolean, details: string[] }}
  */
-export const detectTheft = ({ CS1 = 0, CS2 = 0, CS3 = 0, CS4 = 0, PCS1 = 0, PCS2 = 0 }) => {
-  const mainTheft  = !isWithinTolerance(CS4, PCS1 + PCS2);
-  const pole1Theft = !isWithinTolerance(PCS1, CS1 + CS2);
-  const pole2Theft = !isWithinTolerance(PCS2, CS3);
+export const detectTheft = ({ CS1 = 0, CS2 = 0, CS3 = 0, CS4 = 0, PCS1 = 0, PCS2 = 0 }, tolerance = TOLERANCE) => {
+  const mainTheft  = !isWithinTolerance(CS4, PCS1 + PCS2, tolerance);
+  const pole1Theft = !isWithinTolerance(PCS1, CS1 + CS2, tolerance);
+  const pole2Theft = !isWithinTolerance(PCS2, CS3, tolerance);
 
   const details = [];
   if (mainTheft)  details.push('Theft Detected — Main Input ≠ (Pole 1 + Pole 2)');

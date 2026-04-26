@@ -11,7 +11,7 @@ const LoginScreen = ({ onLogin }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (password === ADMIN_PASSWORD) {
+    if (password === "energyguard") {
       sessionStorage.setItem("eg_auth", "true");
       onLogin();
     } else {

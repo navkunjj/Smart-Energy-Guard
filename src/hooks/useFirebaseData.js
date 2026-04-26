@@ -5,7 +5,8 @@ import { detectTheft } from '../utils/theftDetection';
 
 const roundVal = (v, n = 3) => (v != null ? +Number(v).toFixed(n) : 0);
 
-export const useFirebaseData = () => {
+export const useFirebaseData = (options = {}) => {
+  const { tolerance = 0.2 } = options;
   const [readings, setReadings] = useState({
     CS1: 0, CS2: 0, CS3: 0, CS4: 0, PCS1: 0, PCS2: 0,
     voltage: 0, totalPower: 0, timestamp: null,
@@ -30,6 +31,7 @@ export const useFirebaseData = () => {
   const [calibrationState, setCalibrationState] = useState({
     isRunning: false, progress: 0, phase: '', lastCalibrated: null,
   });
+  const [history, setHistory] = useState([]);
 
   useEffect(() => {
     const connectedRef = ref(db, '.info/connected');
@@ -41,51 +43,65 @@ export const useFirebaseData = () => {
 
     // ── Root listener ────────────────────────────────────────────────────
     // Maps to ACTUAL database structure:
-    //   /sensors → { CS1, CS2, CS3, CS4, PCS1, PCS2 }
-    //   /status  → { batteryVoltage, esp32Online, ip, ssid, … }
-    //   /voltage → number (top-level, optional fallback)
-    //
-    // Backwards-compat: also checks /houses for old keys (house1→CS1 etc.)
+    //   /system/sensors → { house, poles, main }
+    //   /system/status  → { batteryVoltage, esp32Online, ip, ssid, … }
+    //   /system/history → { … }
     const rootRef = ref(db, '/');
     const unsubRoot = onValue(rootRef, (snap) => {
       const allData = snap.val();
       if (!allData) return;
 
-      const statusNode  = allData.status  || {};
-      const sensorsNode = allData.sensors || {};
-      const housesNode  = allData.houses  || {};
-      const topVoltage  = allData.voltage || 0;
+      const systemNode = allData.system || {};
+      const statusNode = systemNode.status || {};
+      const sensorsNode = systemNode.sensors || {};
+      const rawHistory = systemNode.history || {};
 
       // ── Status ─────────────────────────────────────────────────
       setStatus(prev => ({
         ...prev,
-        ...statusNode,
-        noData: false,
+        voltage: statusNode.voltage ?? 0,
+        batteryVoltage: statusNode.batteryVoltage ?? 0,
         theftDetected: statusNode.theftDetected === 1 || statusNode.theftDetected === true,
-        lastSeen: statusNode.esp32LastSeen || Date.now(),
+        theftStatus: statusNode.theftStatus || '',
+        wifiSignal: statusNode.wifiSignal ?? 0,
+        ip: statusNode.ip || '',
+        ssid: statusNode.ssid || '',
+        lastSeen: statusNode.lastSeen || Date.now(),
+        localLastSeen: Date.now(), // Tracks exact local reception time
+        noData: false
       }));
 
-      // ── Sensor readings (prefer /sensors, fallback to /houses) ─
-      const CS1  = roundVal(sensorsNode.CS1  ?? housesNode.house1 ?? 0);
-      const CS2  = roundVal(sensorsNode.CS2  ?? housesNode.house2 ?? 0);
-      const CS3  = roundVal(sensorsNode.CS3  ?? housesNode.house3 ?? 0);
-      const CS4  = roundVal(sensorsNode.CS4  ?? statusNode.mainCurrent ?? 0);
-      const PCS1 = roundVal(sensorsNode.PCS1 ?? 0);
-      const PCS2 = roundVal(sensorsNode.PCS2 ?? 0);
-
-      const batteryV = statusNode.batteryVoltage || topVoltage || 0;
-
+      // ── Sensor readings ───────────────────────────────────────
       const newReadings = {
-        CS1, CS2, CS3, CS4, PCS1, PCS2,
-        voltage: roundVal(batteryV, 2),
-        totalPower: roundVal(CS4 * batteryV, 2),
+        CS1: roundVal(sensorsNode.house?.CS1 ?? 0),
+        CS2: roundVal(sensorsNode.house?.CS2 ?? 0),
+        CS3: roundVal(sensorsNode.house?.CS3 ?? 0),
+        CS4: roundVal(sensorsNode.main?.MCS ?? 0),
+        PCS1: roundVal(sensorsNode.poles?.PCS1 ?? 0),
+        PCS2: roundVal(sensorsNode.poles?.PCS2 ?? 0),
+        voltage: roundVal(statusNode.batteryVoltage ?? 0, 2),
+        totalPower: roundVal((sensorsNode.main?.MCS ?? 0) * (statusNode.batteryVoltage ?? 0), 2),
         timestamp: Date.now(),
       };
-
       setReadings(newReadings);
 
+      // ── History ───────────────────────────────────────────────
+      const parsedHistory = Object.entries(rawHistory)
+        .map(([ts, data]) => ({
+          timestamp: Number(ts), // <--- INJECTED FOR SORTING
+          time: new Date(Number(ts)).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+          CS4: data.MCS ?? 0,
+          PCS1: data.poleTotal ? (data.poleTotal / 2) : 0,
+          PCS2: data.poleTotal ? (data.poleTotal / 2) : 0,
+          ...data
+        }))
+        .sort((a, b) => a.timestamp - b.timestamp)
+        .slice(-30);
+        
+      setHistory(parsedHistory);
+
       // ── Client-side theft detection ────────────────────────────
-      setTheft(detectTheft(newReadings));
+      setTheft(detectTheft(newReadings, tolerance));
     });
 
     const unsubControls = onValue(ref(db, 'controls'), (snap) => {
@@ -105,12 +121,11 @@ export const useFirebaseData = () => {
   // ── Offline heartbeat ──────────────────────────────────────────────────
   useEffect(() => {
     const itv = setInterval(() => {
-      const isOnline = status.lastSeen && (Date.now() - status.lastSeen < 12000);
+      const isOnline = status.localLastSeen && (Date.now() - status.localLastSeen < 10000); // 10 second limit
       if (status.esp32Online !== isOnline) {
         setStatus(prev => ({ ...prev, esp32Online: isOnline }));
         if (!isOnline) {
-          // Force database update to sync offline state globally
-          set(ref(db, 'status/esp32Online'), false);
+          set(ref(db, 'system/status/isOnline'), false);
 
           setReadings({
             CS1: 0, CS2: 0, CS3: 0, CS4: 0, PCS1: 0, PCS2: 0,
@@ -132,18 +147,26 @@ export const useFirebaseData = () => {
       }
     }, 5000);
     return () => clearInterval(itv);
-  }, [status.lastSeen]);
+  }, [status.localLastSeen, status.esp32Online]);
 
   const updateControl = (device, value) => { set(ref(db, `controls/${device}`), value ? 1 : 0); };
-  const resetSystem = () => { set(ref(db, 'status/theftDetected'), 0); };
+  const resetSystem = () => { set(ref(db, 'system/status/theftDetected'), 0); };
 
   const runCalibration = () => {
-    setCalibrationState({ isRunning: true, progress: 0, phase: 'sampling' });
-    setTimeout(() => setCalibrationState({ isRunning: false, progress: 100, phase: 'done' }), 2000);
+    set(ref(db, 'calibration/run'), true);
   };
 
   return {
-    readings, theft, status, controls, logs, updateControl, resetSystem,
-    dbConnected, connectionQuality, lastDbPing, calibrationState, runCalibration,
+    readings, theft, status, controls, logs, history,
+    updateControl, resetSystem,
+    dbConnected, connectionQuality, lastDbPing,
+    calibrationState, runCalibration,
+    
+    // New exact requested structure
+    sensors: {
+      house: { CS1: readings.CS1, CS2: readings.CS2, CS3: readings.CS3 },
+      poles: { PCS1: readings.PCS1, PCS2: readings.PCS2 },
+      main: { MCS: readings.CS4 }
+    }
   };
 };

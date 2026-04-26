@@ -10,8 +10,9 @@ import CurrentComparisonChart from './components/CurrentComparisonChart';
 import WiringDiagram from './components/WiringDiagram';
 import TheftAlertBanner from './components/TheftAlertBanner';
 import LoginScreen from './components/LoginScreen';
+import SettingsModal from './components/SettingsModal';
 import { useFirebaseData } from './hooks/useFirebaseData';
-import { Cpu, Bell } from 'lucide-react';
+import { Cpu, Settings as SettingsIcon } from 'lucide-react';
 
 function App() {
   const [authed, setAuthed] = useState(() => sessionStorage.getItem('eg_auth') === 'true');
@@ -25,32 +26,32 @@ function App() {
 
 function AuthenticatedApp() {
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  
+  // ── Persistent App Settings ─────────────────────────────────────
+  const [appSettings, setAppSettings] = useState(() => {
+    const saved = localStorage.getItem('eg_settings');
+    return saved ? JSON.parse(saved) : {
+      tolerance: 0.2,
+      sirenEnabled: true,
+      sirenTimeout: 60,
+    };
+  });
+
+  const updateSettings = (key, val) => {
+    setAppSettings(prev => {
+      const next = { ...prev, [key]: val };
+      localStorage.setItem('eg_settings', JSON.stringify(next));
+      return next;
+    });
+  };
+
   const {
-    readings, theft, status, controls, logs,
+    readings, theft, status, controls, logs, history,
     updateControl, resetSystem,
     dbConnected, connectionQuality, lastDbPing,
     calibrationState, runCalibration,
-  } = useFirebaseData();
-
-  const [history, setHistory] = useState([]);
-
-  // ── Accumulate history with new sensor keys ─────────────────────
-  useEffect(() => {
-    if (!readings.timestamp || !status.esp32Online) return;
-    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-    setHistory(prev => {
-      return [...prev, {
-        time,
-        CS1: readings.CS1,
-        CS2: readings.CS2,
-        CS3: readings.CS3,
-        CS4: readings.CS4,
-        PCS1: readings.PCS1,
-        PCS2: readings.PCS2,
-        voltage: readings.voltage,
-      }].slice(-30);
-    });
-  }, [readings.timestamp, status.esp32Online]);
+  } = useFirebaseData({ tolerance: appSettings.tolerance });
 
   const renderPage = () => {
     switch (activeTab) {
@@ -140,8 +141,11 @@ function AuthenticatedApp() {
             <div className="ml-auto flex items-center gap-2">
               <ThemeToggle />
               
-              <button className="p-2.5 glass-card rounded-xl text-[var(--muted)] hover:text-blue-500 transition-colors relative shrink-0">
-                <Bell size={18} />
+              <button 
+                onClick={() => setIsSettingsOpen(true)}
+                className="p-2.5 glass-card rounded-xl text-[var(--muted)] hover:text-blue-500 transition-colors relative shrink-0"
+              >
+                <SettingsIcon size={18} />
                 {theft.anyTheft && (
                   <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full pulse-indicator" />
                 )}
@@ -151,10 +155,25 @@ function AuthenticatedApp() {
         </header>
 
         {/* ── Theft Alert Banner ───────────────────────────────── */}
-        <TheftAlertBanner theft={theft} isOffline={!status.esp32Online} />
+        <TheftAlertBanner 
+          theft={theft} 
+          isOffline={!status.esp32Online} 
+          settings={appSettings}
+        />
 
         {/* ── Page Content ───────────────────────────────────────── */}
         {renderPage()}
+
+        {/* ── Settings Overlay ───────────────────────────────────── */}
+        <SettingsModal 
+          isOpen={isSettingsOpen} 
+          onClose={() => setIsSettingsOpen(false)}
+          settings={appSettings}
+          updateSettings={updateSettings}
+          runCalibration={runCalibration}
+          resetSystem={resetSystem}
+          status={status}
+        />
 
         {/* ── Footer ─────────────────────────────────────────────── */}
         <footer className="mt-10 py-6 border-t border-[var(--card-border)] flex flex-col md:flex-row items-center justify-between gap-3">
@@ -179,8 +198,7 @@ function AuthenticatedApp() {
    ═══════════════════════════════════════════════════════════════════ */
 function DashboardPage({
   readings, theft, status, controls, logs, history,
-  updateControl, resetSystem,
-  calibrationState, runCalibration
+  updateControl, resetSystem
 }) {
   return (
     <>

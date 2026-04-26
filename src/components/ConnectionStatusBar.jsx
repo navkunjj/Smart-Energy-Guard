@@ -29,7 +29,7 @@ function resolveWifi(rawStatus, dbConnected, connectionQuality) {
 const ConnectionStatusBar = ({ status, dbConnected, connectionQuality, lastDbPing }) => {
   const [pingMs, setPingMs] = useState(null);
   const [uptimeSeconds, setUptimeSeconds] = useState(0);
-  const [startTime] = useState(Date.now());
+  const [startTime] = useState(() => Date.now());
 
   // Session clock — ticks every second
   useEffect(() => {

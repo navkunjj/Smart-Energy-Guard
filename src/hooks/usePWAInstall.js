@@ -16,10 +16,7 @@ export const usePWAInstall = () => {
 
     window.addEventListener('beforeinstallprompt', handler);
 
-    // Check if app is already installed
-    if (window.matchMedia('(display-mode: standalone)').matches) {
-      setIsInstallable(false);
-    }
+    // App is already installed or prompt will fire later
 
     return () => window.removeEventListener('beforeinstallprompt', handler);
   }, []);
