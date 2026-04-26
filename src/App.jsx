@@ -1,32 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
-import LiveMonitoringCard from './components/LiveMonitoringCard';
-import TheftDetectionStatus from './components/TheftDetectionStatus';
-import SocietyLayout from './components/SocietyLayout';
-import DeviceControls from './components/DeviceControls';
-import RealTimeChart from './components/RealTimeChart';
-import EventLog from './components/EventLog';
 import HistoryLog from './components/HistoryLog';
-
 import AnalyticsPage from './components/AnalyticsPage';
 import ControlPage from './components/ControlPage';
-import ESP32StatusCard from './components/ESP32StatusCard';
 import ConnectionStatusBar from './components/ConnectionStatusBar';
-import CalibrationPanel from './components/CalibrationPanel';
 import ThemeToggle from './components/ThemeToggle';
-import NotificationContainer from './components/NotificationToast';
 import StatusGrid from './components/StatusGrid';
 import CurrentComparisonChart from './components/CurrentComparisonChart';
+import WiringDiagram from './components/WiringDiagram';
+import TheftAlertBanner from './components/TheftAlertBanner';
 import LoginScreen from './components/LoginScreen';
 import { useFirebaseData } from './hooks/useFirebaseData';
-import {
-  Activity,
-  Zap,
-  Waves,
-  Cpu,
-  BatteryMedium,
-  Bell,
-} from 'lucide-react';
+import { Cpu, Bell } from 'lucide-react';
 
 function App() {
   const [authed, setAuthed] = useState(() => sessionStorage.getItem('eg_auth') === 'true');
@@ -41,36 +26,36 @@ function App() {
 function AuthenticatedApp() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const {
-    readings, status, controls, logs,
+    readings, theft, status, controls, logs,
     updateControl, resetSystem,
     dbConnected, connectionQuality, lastDbPing,
     calibrationState, runCalibration,
   } = useFirebaseData();
 
-
   const [history, setHistory] = useState([]);
 
+  // ── Accumulate history with new sensor keys ─────────────────────
   useEffect(() => {
     if (!readings.timestamp || !status.esp32Online) return;
     const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     setHistory(prev => {
-      const totalHouses = Number((readings.house1 + readings.house2 + readings.house3).toFixed(3));
       return [...prev, {
         time,
-        main: readings.mainLine,
-        h1: readings.house1,
-        h2: readings.house2,
-        h3: readings.house3,
-        total: totalHouses,
+        CS1: readings.CS1,
+        CS2: readings.CS2,
+        CS3: readings.CS3,
+        CS4: readings.CS4,
+        PCS1: readings.PCS1,
+        PCS2: readings.PCS2,
         voltage: readings.voltage,
-      }].slice(-20);
+      }].slice(-30);
     });
   }, [readings.timestamp, status.esp32Online]);
 
   const renderPage = () => {
     switch (activeTab) {
       case 'analytics':
-        return <AnalyticsPage readings={readings} history={history} />;
+        return <AnalyticsPage readings={readings} history={history} theft={theft} />;
       case 'control':
         return (
           <ControlPage
@@ -79,25 +64,37 @@ function AuthenticatedApp() {
             resetSystem={resetSystem}
             status={status}
             readings={readings}
-
+            theft={theft}
           />
         );
       case 'history':
         return (
-          <div className="h-[calc(100vh-140px)] w-full max-w-4xl mx-auto">
+          <div className="h-[calc(100vh-140px)] w-full max-w-5xl mx-auto">
             <HistoryLog history={history} />
+          </div>
+        );
+      case 'diagram':
+        return (
+          <div>
+            <header className="mb-6">
+              <h1 className="text-2xl lg:text-3xl font-black tracking-tight">WIRING MAP</h1>
+              <p className="opacity-40 font-medium uppercase tracking-[0.2em] text-[10px] mt-1">
+                Interactive Network Topology & Current Flow
+              </p>
+            </header>
+            <WiringDiagram readings={readings} theft={theft} isOffline={!status.esp32Online} />
           </div>
         );
       default:
         return (
           <DashboardPage
             readings={readings}
+            theft={theft}
             status={status}
             controls={controls}
             logs={logs}
             history={history}
             updateControl={updateControl}
-
             resetSystem={resetSystem}
             calibrationState={calibrationState}
             runCalibration={runCalibration}
@@ -145,7 +142,7 @@ function AuthenticatedApp() {
               
               <button className="p-2.5 glass-card rounded-xl text-[var(--muted)] hover:text-blue-500 transition-colors relative shrink-0">
                 <Bell size={18} />
-                {status.theftDetected && (
+                {theft.anyTheft && (
                   <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full pulse-indicator" />
                 )}
               </button>
@@ -153,13 +150,16 @@ function AuthenticatedApp() {
           </div>
         </header>
 
+        {/* ── Theft Alert Banner ───────────────────────────────── */}
+        <TheftAlertBanner theft={theft} isOffline={!status.esp32Online} />
+
         {/* ── Page Content ───────────────────────────────────────── */}
         {renderPage()}
 
         {/* ── Footer ─────────────────────────────────────────────── */}
         <footer className="mt-10 py-6 border-t border-[var(--card-border)] flex flex-col md:flex-row items-center justify-between gap-3">
           <p className="opacity-40 text-[11px] font-medium text-center">
-            © 2026 Energy Guard Society. Industrial IoT Surveillance System.
+            © 2026 Energy Guard Society. Smart Grid IoT Surveillance System.
           </p>
           <div className="flex items-center gap-4 text-[10px] font-black uppercase opacity-40">
             <span className="hover:text-blue-500 cursor-pointer transition-colors">Docs</span>
@@ -170,8 +170,6 @@ function AuthenticatedApp() {
           </div>
         </footer>
       </main>
-
-
     </div>
   );
 }
@@ -180,7 +178,7 @@ function AuthenticatedApp() {
    Dashboard page
    ═══════════════════════════════════════════════════════════════════ */
 function DashboardPage({
-  readings, status, controls, logs, history,
+  readings, theft, status, controls, logs, history,
   updateControl, resetSystem,
   calibrationState, runCalibration
 }) {
@@ -196,9 +194,14 @@ function DashboardPage({
         </div>
       </header>
 
-      {/* Compact Status + House Currents */}
+      {/* Sensor Cards + Status */}
       <div className="mb-6">
-        <StatusGrid status={status} readings={readings} />
+        <StatusGrid status={status} readings={readings} theft={theft} />
+      </div>
+
+      {/* Wiring Diagram (inline on dashboard) */}
+      <div className="mb-6">
+        <WiringDiagram readings={readings} theft={theft} isOffline={!status.esp32Online} />
       </div>
 
       {/* Current Comparison Chart + Event Log */}
@@ -209,11 +212,11 @@ function DashboardPage({
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-1">
                 <div className="w-2 h-2 rounded-full bg-rose-500" />
-                <span className="text-[9px] opacity-30 font-bold uppercase">Main Grid</span>
+                <span className="text-[9px] opacity-30 font-bold uppercase">Main Input</span>
               </div>
               <div className="flex items-center gap-1">
                 <div className="w-2 h-2 rounded-full bg-blue-500" />
-                <span className="text-[9px] opacity-30 font-bold uppercase">Houses Total</span>
+                <span className="text-[9px] opacity-30 font-bold uppercase">Poles Total</span>
               </div>
             </div>
           </div>

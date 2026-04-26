@@ -108,3 +108,74 @@ body {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* ════════════════════════════════════════════════════════════════
+   NEW — Wiring Diagram: animated current-flow dashes
+   ════════════════════════════════════════════════════════════════ */
+@keyframes flow-dash {
+  to { stroke-dashoffset: -24; }
+}
+
+.wire-flow {
+  stroke-dasharray: 8 4;
+  animation: flow-dash 0.8s linear infinite;
+}
+
+.wire-flow-reverse {
+  stroke-dasharray: 8 4;
+  animation: flow-dash 0.8s linear infinite reverse;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   NEW — Theft glow effect for cards / sections
+   ════════════════════════════════════════════════════════════════ */
+@keyframes theft-pulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(244, 63, 94, 0.3); }
+  50%      { box-shadow: 0 0 24px rgba(244, 63, 94, 0.6); }
+}
+
+.theft-glow {
+  animation: theft-pulse 1.5s ease-in-out infinite;
+  border-color: rgba(244, 63, 94, 0.5) !important;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   NEW — Theft alert banner gradient sweep
+   ════════════════════════════════════════════════════════════════ */
+@keyframes banner-sweep {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.theft-banner {
+  background: linear-gradient(270deg, rgba(244,63,94,0.15), rgba(239,68,68,0.25), rgba(244,63,94,0.15));
+  background-size: 200% 200%;
+  animation: banner-sweep 4s ease infinite;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   NEW — Toast slide-in / slide-out
+   ════════════════════════════════════════════════════════════════ */
+@keyframes toast-in {
+  from { transform: translateX(100%); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+
+@keyframes toast-out {
+  from { transform: translateX(0);    opacity: 1; }
+  to   { transform: translateX(100%); opacity: 0; }
+}
+
+.toast-enter {
+  animation: toast-in 0.4s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+.toast-exit {
+  animation: toast-out 0.3s ease-in forwards;
+}
+
+/* SVG glow filter fallback */
+.svg-theft-glow {
+  filter: drop-shadow(0 0 6px rgba(244, 63, 94, 0.7));
+}

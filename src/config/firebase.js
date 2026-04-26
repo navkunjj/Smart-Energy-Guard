@@ -1,17 +1,18 @@
 import { initializeApp } from "firebase/app";
 import { getDatabase } from "firebase/database";
+import { getAnalytics } from "firebase/analytics";
 
-// NOTE: These are placeholder credentials. 
-// The user will need to replace these with their actual Firebase config.
 const firebaseConfig = {
-  apiKey: "AIzaSyCsJM3gUaydTBoLPZyALTJiUkZyHR0K69g",
-  authDomain: "esp32test-198b8.firebaseapp.com",
-  databaseURL: "https://esp32test-198b8-default-rtdb.firebaseio.com",
-  projectId: "esp32test-198b8",
-  storageBucket: "esp32test-198b8.firebasestorage.app",
-  messagingSenderId: "1006960615391",
-  appId: "1:1006960615391:web:b40d27306e38eb47dfae6a",
+  apiKey: "AIzaSyD_u4SAF_D8ms-dpZwkDasaOr5jPlRuHoY",
+  authDomain: "smart-energyguard.firebaseapp.com",
+  databaseURL: "https://smart-energyguard-default-rtdb.firebaseio.com",
+  projectId: "smart-energyguard",
+  storageBucket: "smart-energyguard.firebasestorage.app",
+  messagingSenderId: "976323223515",
+  appId: "1:976323223515:web:36c955924bbff1a9e491fe",
+  measurementId: "G-2ZXW5YQ5YY"
 };
 
 const app = initializeApp(firebaseConfig);
 export const db = getDatabase(app);
+export const analytics = typeof window !== "undefined" ? getAnalytics(app) : null;

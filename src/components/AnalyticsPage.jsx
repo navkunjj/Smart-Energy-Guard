@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import {
   Chart as ChartJS, CategoryScale, LinearScale, PointElement,
   LineElement, BarElement, Title, Tooltip, Legend, Filler, ArcElement
 } from 'chart.js';
 import { Line, Bar, Doughnut } from 'react-chartjs-2';
-import { Activity, Zap, TrendingUp, TrendingDown, Home } from 'lucide-react';
+import { Activity, Zap, TrendingUp, Home, GitBranch } from 'lucide-react';
 
 ChartJS.register(
   CategoryScale, LinearScale, PointElement, LineElement, BarElement,
@@ -29,38 +29,91 @@ const lineOptions = {
   },
 };
 
-const barOptions = {
-  ...lineOptions,
-  plugins: { ...lineOptions.plugins, legend: { display: false } },
-};
-
-const AnalyticsPage = ({ readings, history = [] }) => {
+const AnalyticsPage = ({ readings, history = [], theft }) => {
   const labels = history.map(d => d.time);
 
-  const multiLineData = {
+  // ── Chart 1: Main vs Poles Total vs Pole 1 vs Pole 2 ────────────
+  const mainVsPolesData = {
     labels,
     datasets: [
-      { label: 'House 1', data: history.map(d => d.h1), borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.08)', fill: true, tension: 0.4, pointRadius: 2, borderWidth: 2 },
-      { label: 'House 2', data: history.map(d => d.h2), borderColor: '#a855f7', backgroundColor: 'rgba(168,85,247,0.08)', fill: true, tension: 0.4, pointRadius: 2, borderWidth: 2 },
-      { label: 'House 3', data: history.map(d => d.h3), borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.08)', fill: true, tension: 0.4, pointRadius: 2, borderWidth: 2 },
+      {
+        label: 'Main Input',
+        data: history.map(d => d.CS4 ?? 0),
+        borderColor: '#f43f5e',
+        backgroundColor: 'rgba(244,63,94,0.08)',
+        fill: true, tension: 0.4, pointRadius: 2, borderWidth: 2,
+      },
+      {
+        label: 'Poles Total',
+        data: history.map(d => (d.PCS1 ?? 0) + (d.PCS2 ?? 0)),
+        borderColor: '#3b82f6',
+        backgroundColor: 'rgba(59,130,246,0.06)',
+        fill: true, tension: 0.4, pointRadius: 2, borderWidth: 2,
+      },
+      {
+        label: 'Pole 1',
+        data: history.map(d => d.PCS1 ?? 0),
+        borderColor: '#06b6d4',
+        backgroundColor: 'rgba(6,182,212,0.06)',
+        fill: true, tension: 0.4, pointRadius: 2, borderWidth: 2,
+      },
+      {
+        label: 'Pole 2',
+        data: history.map(d => d.PCS2 ?? 0),
+        borderColor: '#f59e0b',
+        backgroundColor: 'rgba(245,158,11,0.06)',
+        fill: true, tension: 0.4, pointRadius: 2, borderWidth: 2,
+      },
     ],
   };
 
-  const barData = {
-    labels: ['House 1', 'House 2', 'House 3'],
-    datasets: [{
-      label: 'Current (A)',
-      data: [readings.house1, readings.house2, readings.house3],
-      backgroundColor: ['rgba(59,130,246,0.7)', 'rgba(168,85,247,0.7)', 'rgba(16,185,129,0.7)'],
-      borderColor: ['#3b82f6', '#a855f7', '#10b981'],
-      borderWidth: 2, borderRadius: 8,
-    }],
+  // ── Chart 2: PCS1 vs (CS1 + CS2) — Pole 1 check ───────────────
+  const pole1CompareData = {
+    labels,
+    datasets: [
+      {
+        label: 'Pole 1 Total',
+        data: history.map(d => d.PCS1 ?? 0),
+        borderColor: '#8b5cf6',
+        backgroundColor: 'rgba(139,92,246,0.08)',
+        fill: true, tension: 0.4, pointRadius: 2, borderWidth: 2,
+      },
+      {
+        label: 'Pole 1 Loads (H1+H2)',
+        data: history.map(d => (d.CS1 ?? 0) + (d.CS2 ?? 0)),
+        borderColor: '#06b6d4',
+        backgroundColor: 'rgba(6,182,212,0.06)',
+        fill: true, tension: 0.4, pointRadius: 2, borderWidth: 2,
+      },
+    ],
   };
 
+  // ── Chart 3: PCS2 vs CS3 — Pole 2 check ───────────────────────
+  const pole2CompareData = {
+    labels,
+    datasets: [
+      {
+        label: 'Pole 2 Total',
+        data: history.map(d => d.PCS2 ?? 0),
+        borderColor: '#f59e0b',
+        backgroundColor: 'rgba(245,158,11,0.08)',
+        fill: true, tension: 0.4, pointRadius: 2, borderWidth: 2,
+      },
+      {
+        label: 'House 3 Load',
+        data: history.map(d => d.CS3 ?? 0),
+        borderColor: '#10b981',
+        backgroundColor: 'rgba(16,185,129,0.06)',
+        fill: true, tension: 0.4, pointRadius: 2, borderWidth: 2,
+      },
+    ],
+  };
+
+  // ── Doughnut: load distribution ─────────────────────────────────
   const doughnutData = {
     labels: ['House 1', 'House 2', 'House 3'],
     datasets: [{
-      data: [readings.house1, readings.house2, readings.house3],
+      data: [readings.CS1 || 0, readings.CS2 || 0, readings.CS3 || 0],
       backgroundColor: ['rgba(59,130,246,0.8)', 'rgba(168,85,247,0.8)', 'rgba(16,185,129,0.8)'],
       borderColor: ['#3b82f6', '#a855f7', '#10b981'],
       borderWidth: 2,
@@ -75,19 +128,41 @@ const AnalyticsPage = ({ readings, history = [] }) => {
     },
   };
 
-  const totalCurrent = readings.house1 + readings.house2 + readings.house3;
+  // ── Bar chart: all sensors ──────────────────────────────────────
+  const barData = {
+    labels: ['House 1', 'House 2', 'House 3', 'Pole 1', 'Pole 2', 'Main Input'],
+    datasets: [{
+      label: 'Current (A)',
+      data: [readings.CS1, readings.CS2, readings.CS3, readings.PCS1, readings.PCS2, readings.CS4],
+      backgroundColor: [
+        'rgba(59,130,246,0.7)', 'rgba(168,85,247,0.7)', 'rgba(16,185,129,0.7)',
+        'rgba(6,182,212,0.7)', 'rgba(245,158,11,0.7)', 'rgba(244,63,94,0.7)',
+      ],
+      borderColor: ['#3b82f6', '#a855f7', '#10b981', '#06b6d4', '#f59e0b', '#f43f5e'],
+      borderWidth: 2, borderRadius: 8,
+    }],
+  };
 
+  const barOptions = {
+    ...lineOptions,
+    plugins: { ...lineOptions.plugins, legend: { display: false } },
+  };
+
+  const totalLoad = (readings.CS1 || 0) + (readings.CS2 || 0) + (readings.CS3 || 0);
+
+  // ── Stat Cards ──────────────────────────────────────────────────
   const statCards = [
-    { label: 'Total Load Current', value: `${readings.mainLine}`, unit: 'A', icon: Zap, color: 'blue', trend: 0 },
-    { label: 'Grid Voltage', value: `${readings.voltage}`, unit: 'V', icon: Activity, color: 'purple', trend: 0 },
-    { label: 'Network Power', value: `${readings.totalPower}`, unit: 'W', icon: TrendingUp, color: 'green', trend: 0 },
-    { label: 'Sum of Houses', value: `${totalCurrent.toFixed(2)}`, unit: 'A', icon: Home, color: 'orange', trend: 0 },
+    { label: 'Main Input', value: `${readings.CS4 || 0}`, unit: 'A', icon: Zap, color: 'rose' },
+    { label: 'Pole 1 Total', value: `${readings.PCS1 || 0}`, unit: 'A', icon: GitBranch, color: 'blue' },
+    { label: 'Pole 2 Total', value: `${readings.PCS2 || 0}`, unit: 'A', icon: GitBranch, color: 'cyan' },
+    { label: 'Total Loads', value: `${totalLoad.toFixed(2)}`, unit: 'A', icon: Home, color: 'green' },
   ];
 
   const colorMap = {
     blue: 'border-blue-500/30 text-blue-500 bg-blue-500/10',
     green: 'border-emerald-500/30 text-emerald-500 bg-emerald-500/10',
-    orange: 'border-orange-500/30 text-orange-500 bg-orange-500/10',
+    rose: 'border-rose-500/30 text-rose-500 bg-rose-500/10',
+    cyan: 'border-cyan-500/30 text-cyan-500 bg-cyan-500/10',
     purple: 'border-purple-500/30 text-purple-500 bg-purple-500/10',
   };
 
@@ -96,7 +171,7 @@ const AnalyticsPage = ({ readings, history = [] }) => {
       <header className="mb-8">
         <h1 className="text-3xl font-black tracking-tight">ANALYTICS</h1>
         <p className="opacity-40 font-medium uppercase tracking-[0.2em] text-[10px] mt-1">
-          Real-Time Power Consumption Analysis
+          Multi-Level Current Comparison & Theft Analysis
         </p>
       </header>
 
@@ -123,12 +198,58 @@ const AnalyticsPage = ({ readings, history = [] }) => {
         })}
       </div>
 
-      {/* Charts Row 1 */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+      {/* ── Main Comparison: Main vs Poles vs Individual ──────── */}
+      <div className="glass-card p-6 rounded-2xl mb-6">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-sm font-bold uppercase tracking-wider">Main Input vs Poles Breakdown</h3>
+          {theft?.mainTheft && (
+            <span className="text-[10px] font-black text-rose-400 bg-rose-500/10 px-2.5 py-1 rounded-full border border-rose-500/20 uppercase animate-pulse">
+              ⚠ Mismatch
+            </span>
+          )}
+        </div>
+        <div className="h-64">
+          <Line data={mainVsPolesData} options={lineOptions} />
+        </div>
+      </div>
+
+      {/* ── Pole-Level Comparisons ─────────────────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <div className={`glass-card p-6 rounded-2xl ${theft?.pole1Theft ? 'border border-rose-500/30' : ''}`}>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-bold uppercase tracking-wider">Pole 1 Total vs Houses</h3>
+            {theft?.pole1Theft && (
+              <span className="text-[10px] font-black text-rose-400 bg-rose-500/10 px-2.5 py-1 rounded-full border border-rose-500/20 uppercase animate-pulse">
+                ⚠ Pole 1
+              </span>
+            )}
+          </div>
+          <div className="h-56">
+            <Line data={pole1CompareData} options={lineOptions} />
+          </div>
+        </div>
+
+        <div className={`glass-card p-6 rounded-2xl ${theft?.pole2Theft ? 'border border-rose-500/30' : ''}`}>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-bold uppercase tracking-wider">Pole 2 Total vs House 3</h3>
+            {theft?.pole2Theft && (
+              <span className="text-[10px] font-black text-rose-400 bg-rose-500/10 px-2.5 py-1 rounded-full border border-rose-500/20 uppercase animate-pulse">
+                ⚠ Pole 2
+              </span>
+            )}
+          </div>
+          <div className="h-56">
+            <Line data={pole2CompareData} options={lineOptions} />
+          </div>
+        </div>
+      </div>
+
+      {/* ── Distribution Charts ────────────────────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 glass-card p-6 rounded-2xl">
-          <h3 className="text-sm font-bold uppercase tracking-wider mb-6">Per-House Current (Live)</h3>
-          <div className="h-64">
-            <Line data={multiLineData} options={lineOptions} />
+          <h3 className="text-sm font-bold uppercase tracking-wider mb-6">All Sensors — Comparative Load</h3>
+          <div className="h-56">
+            <Bar data={barData} options={barOptions} />
           </div>
         </div>
 
@@ -139,38 +260,9 @@ const AnalyticsPage = ({ readings, history = [] }) => {
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
               <div className="text-center mt-[-20px]">
                 <p className="text-xs opacity-40 uppercase font-bold">Total</p>
-                <p className="text-xl font-black">{totalCurrent.toFixed(1)}A</p>
+                <p className="text-xl font-black">{totalLoad.toFixed(1)}A</p>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Charts Row 2 */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="glass-card p-6 rounded-2xl">
-          <h3 className="text-sm font-bold uppercase tracking-wider mb-6">Comparative House Load</h3>
-          <div className="h-56">
-            <Bar data={barData} options={barOptions} />
-          </div>
-        </div>
-
-        <div className="glass-card p-6 rounded-2xl">
-          <h3 className="text-sm font-bold uppercase tracking-wider mb-6">Main Line Current Trend</h3>
-          <div className="h-56">
-            <Line
-              data={{
-                labels,
-                datasets: [{
-                  label: 'Main Current (A)',
-                  data: history.map(d => d.main),
-                  borderColor: '#f43f5e',
-                  backgroundColor: 'rgba(244,63,94,0.1)',
-                  fill: true, tension: 0.4, pointRadius: 2, borderWidth: 2,
-                }],
-              }}
-              options={lineOptions}
-            />
           </div>
         </div>
       </div>

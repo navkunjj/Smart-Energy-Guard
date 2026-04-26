@@ -10,11 +10,13 @@ import {
   Menu,
   X,
   Smartphone,
+  GitBranch,
 } from 'lucide-react';
 import { usePWAInstall } from '../hooks/usePWAInstall';
 
 const menuItems = [
   { id: 'dashboard',  label: 'Monitor',       icon: LayoutDashboard },
+  { id: 'diagram',    label: 'Wiring Map',    icon: GitBranch },
   { id: 'analytics',  label: 'Analytics',     icon: Activity },
   { id: 'control',    label: 'Device Control', icon: Settings },
   { id: 'history',    label: 'System History', icon: History },
@@ -26,14 +28,14 @@ const MobileTab = ({ item, active, onClick }) => {
   return (
     <button
       onClick={() => onClick(item.id)}
-      className={`flex flex-col items-center gap-1 px-3 py-2 rounded-xl flex-1 transition-all duration-200 ${
+      className={`flex flex-col items-center gap-1 px-2 py-2 rounded-xl flex-1 transition-all duration-200 ${
         active
           ? 'text-blue-500 bg-blue-500/10'
           : 'opacity-40 hover:opacity-100'
       }`}
     >
-      <Icon size={20} />
-      <span className="text-[9px] font-bold uppercase tracking-wide leading-none">
+      <Icon size={18} />
+      <span className="text-[8px] font-bold uppercase tracking-wide leading-none">
         {item.label}
       </span>
     </button>
@@ -80,7 +82,7 @@ const Sidebar = ({ activeTab, setActiveTab, status }) => {
           </div>
           <div>
             <h1 className="text-sm font-bold leading-none">ENERGY GUARD</h1>
-            <p className="text-[10px] opacity-60 mt-1 uppercase tracking-wider">Smart Power Detection</p>
+            <p className="text-[10px] opacity-60 mt-1 uppercase tracking-wider">Smart Grid Detection</p>
           </div>
         </div>
 
@@ -148,7 +150,7 @@ const Sidebar = ({ activeTab, setActiveTab, status }) => {
           </div>
           <div>
             <p className="text-xs font-bold leading-none">ENERGY GUARD</p>
-            <p className="text-[9px] opacity-60 uppercase tracking-wider">Smart Power Detection</p>
+            <p className="text-[9px] opacity-60 uppercase tracking-wider">Smart Grid Detection</p>
           </div>
         </div>
 
@@ -214,7 +216,7 @@ const Sidebar = ({ activeTab, setActiveTab, status }) => {
       )}
 
       {/* ── Mobile bottom tab bar ───────────────────────────────── */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 flex items-center gap-1 px-2 py-2 glass-card border-t border-white/10">
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 flex items-center gap-0.5 px-1 py-2 glass-card border-t border-white/10">
         {menuItems.map(item => (
           <MobileTab key={item.id} item={item} active={activeTab === item.id} onClick={handleNav} />
         ))}

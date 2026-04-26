@@ -12,8 +12,8 @@ const CurrentComparisonChart = ({ data = [] }) => {
     labels: data.map(d => d.time),
     datasets: [
       {
-        label: 'Main Grid (A)',
-        data: data.map(d => d.main),
+        label: 'Main Input (A)',
+        data: data.map(d => d.CS4 ?? d.main ?? 0),
         borderColor: '#f43f5e',
         backgroundColor: 'rgba(244, 63, 94, 0.08)',
         fill: true,
@@ -22,8 +22,8 @@ const CurrentComparisonChart = ({ data = [] }) => {
         borderWidth: 2,
       },
       {
-        label: 'Houses Total (A)',
-        data: data.map(d => (d.h1 || 0) + (d.h2 || 0) + (d.h3 || 0)),
+        label: 'Poles Total (A)',
+        data: data.map(d => (d.PCS1 ?? 0) + (d.PCS2 ?? 0)),
         borderColor: '#3b82f6',
         backgroundColor: 'rgba(59, 130, 246, 0.06)',
         fill: true,
