@@ -201,51 +201,59 @@ function DashboardPage({
   updateControl, resetSystem
 }) {
   return (
-    <>
-      <header className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl lg:text-3xl font-black tracking-tight">DASHBOARD</h1>
-        <div className="flex items-center gap-2">
+    <div className="max-w-[1600px] mx-auto">
+      <header className="mb-4 lg:mb-8 flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl md:text-3xl lg:text-4xl font-black tracking-tight">DASHBOARD</h1>
+          <p className="hidden md:block opacity-40 text-[10px] font-bold uppercase tracking-widest mt-1">Live Power Monitoring & Analytics</p>
+        </div>
+        <div className="flex items-center gap-2 px-4 py-2 glass-card rounded-2xl border border-white/5">
           <span className={`w-2.5 h-2.5 rounded-full ${status.esp32Online ? 'bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.6)]' : 'bg-rose-500'}`} />
           <span className="text-[10px] font-black uppercase tracking-widest opacity-40">
-            {status.esp32Online ? 'Online' : 'Offline'}
+            {status.esp32Online ? 'System Online' : 'System Offline'}
           </span>
         </div>
       </header>
 
       {/* Sensor Cards + Status */}
-      <div className="mb-6">
+      <div className="mb-6 lg:mb-10">
         <StatusGrid status={status} readings={readings} theft={theft} />
       </div>
 
       {/* Wiring Diagram (inline on dashboard) */}
-      <div className="mb-6">
+      <div className="mb-6 lg:mb-10">
         <WiringDiagram readings={readings} theft={theft} isOffline={!status.esp32Online} />
       </div>
 
       {/* Current Comparison Chart + Event Log */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
-        <div className="glass-card p-4 lg:p-6 rounded-2xl">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-[10px] font-black uppercase tracking-widest opacity-40">Current Comparison</h3>
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1">
-                <div className="w-2 h-2 rounded-full bg-rose-500" />
-                <span className="text-[9px] opacity-30 font-bold uppercase">Main Input</span>
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 lg:gap-10">
+        <div className="xl:col-span-2 glass-card p-6 lg:p-10 rounded-[2rem] border border-white/5 shadow-2xl">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+            <div>
+              <h3 className="text-xs font-black uppercase tracking-widest opacity-40 mb-1">Current Comparison</h3>
+              <p className="text-[10px] opacity-30 font-medium">Main Grid vs Total Pole Distribution (Amps)</p>
+            </div>
+            <div className="flex items-center gap-6">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.4)]" />
+                <span className="text-[10px] opacity-40 font-black uppercase tracking-widest">Main Input</span>
               </div>
-              <div className="flex items-center gap-1">
-                <div className="w-2 h-2 rounded-full bg-blue-500" />
-                <span className="text-[9px] opacity-30 font-bold uppercase">Poles Total</span>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.4)]" />
+                <span className="text-[10px] opacity-40 font-black uppercase tracking-widest">Poles Total</span>
               </div>
             </div>
           </div>
-          <div className="h-56">
+          <div className="h-[300px] lg:h-[400px]">
             <CurrentComparisonChart data={history} />
           </div>
         </div>
 
-        <HistoryLog history={history} />
+        <div className="xl:col-span-1">
+          <HistoryLog history={history} />
+        </div>
       </div>
-    </>
+    </div>
   );
 }
 
