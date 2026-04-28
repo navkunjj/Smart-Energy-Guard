@@ -32,16 +32,18 @@ setInterval(() => {
   const main = pcs1 + pcs2 + theftAmt;
 
   update(ref(db, '/'), {
-    "sensors/CS1": cs1,
-    "sensors/CS2": cs2,
-    "sensors/CS3": cs3,
-    "sensors/PCS1": pcs1,
-    "sensors/PCS2": pcs2,
-    "sensors/CS4": main,
-    "status/esp32Online": true,
-    "status/esp32LastSeen": serverTimestamp(),
+    "sensors/house/CS1": cs1,
+    "sensors/house/CS2": cs2,
+    "sensors/house/CS3": cs3,
+    "sensors/poles/PCS1": pcs1,
+    "sensors/poles/PCS2": pcs2,
+    "sensors/main/MCS": main,
+    "status/isOnline": true,
+    "status/lastSeen": serverTimestamp(),
     "status/batteryVoltage": 12.2 + Math.random() * 0.1,
-    "status/wifiSignal": -45 - Math.floor(Math.random() * 5)
+    "status/wifiSignal": -45 - Math.floor(Math.random() * 5),
+    "status/theftDetected": isTheft,
+    "status/theftStatus": isTheft ? "CRITICAL: Power Theft Detected!" : "System Normal"
   }).then(() => {
     console.log(`[Tick ${tick}] Data pushed (Theft Active: ${isTheft})`);
   }).catch(e => console.error(e));

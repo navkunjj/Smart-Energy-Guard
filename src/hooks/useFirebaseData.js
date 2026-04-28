@@ -43,18 +43,17 @@ export const useFirebaseData = (options = {}) => {
 
     // ── Root listener ────────────────────────────────────────────────────
     // Maps to ACTUAL database structure:
-    //   /system/sensors → { house, poles, main }
-    //   /system/status  → { batteryVoltage, esp32Online, ip, ssid, … }
-    //   /system/history → { … }
+    //   /sensors → { house, poles, main }
+    //   /status  → { voltage, batteryVoltage, ip, ssid, … }
+    //   /history → { … }
     const rootRef = ref(db, '/');
     const unsubRoot = onValue(rootRef, (snap) => {
       const allData = snap.val();
       if (!allData) return;
 
-      const systemNode = allData.system || {};
-      const statusNode = systemNode.status || {};
-      const sensorsNode = systemNode.sensors || {};
-      const rawHistory = systemNode.history || {};
+      const statusNode = allData.status || {};
+      const sensorsNode = allData.sensors || {};
+      const rawHistory = allData.history || {};
 
       // ── Status ─────────────────────────────────────────────────
       setStatus(prev => ({
@@ -125,7 +124,7 @@ export const useFirebaseData = (options = {}) => {
       if (status.esp32Online !== isOnline) {
         setStatus(prev => ({ ...prev, esp32Online: isOnline }));
         if (!isOnline) {
-          set(ref(db, 'system/status/isOnline'), false);
+          set(ref(db, 'status/isOnline'), false);
 
           setReadings({
             CS1: 0, CS2: 0, CS3: 0, CS4: 0, PCS1: 0, PCS2: 0,
@@ -150,7 +149,7 @@ export const useFirebaseData = (options = {}) => {
   }, [status.localLastSeen, status.esp32Online]);
 
   const updateControl = (device, value) => { set(ref(db, `controls/${device}`), value ? 1 : 0); };
-  const resetSystem = () => { set(ref(db, 'system/status/theftDetected'), 0); };
+  const resetSystem = () => { set(ref(db, 'status/theftDetected'), 0); };
 
   const runCalibration = () => {
     set(ref(db, 'calibration/run'), true);

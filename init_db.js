@@ -19,23 +19,29 @@ async function initDB() {
   try {
     await set(ref(db, '/'), {
       sensors: {
-        CS1: 0.0,
-        CS2: 0.0,
-        CS3: 0.0,
-        CS4: 0.0,
-        PCS1: 0.0,
-        PCS2: 0.0
+        house: {
+          CS1: 0.0,
+          CS2: 0.0,
+          CS3: 0.0
+        },
+        poles: {
+          PCS1: 0.0,
+          PCS2: 0.0
+        },
+        main: {
+          MCS: 0.0
+        }
       },
       status: {
+        voltage: 0.0,
         batteryVoltage: 7.4,
-        esp32Online: false,
         ip: "192.168.1.100",
         ssid: "Network",
-        theftDetected: 0,
-        uptime: 0,
         wifiSignal: -50,
-        wifiStatus: "Connected",
-        esp32LastSeen: Date.now()
+        lastSeen: Date.now(),
+        isOnline: false,
+        theftDetected: 0,
+        theftStatus: "System Normal"
       },
       controls: {
         led: 0,
