@@ -67,6 +67,7 @@ export const useFirebaseData = (options = {}) => {
         ssid: statusNode.ssid || '',
         lastSeen: statusNode.lastSeen || Date.now(),
         localLastSeen: Date.now(), // Tracks exact local reception time
+        esp32Online: statusNode.isOnline !== undefined ? statusNode.isOnline : true,
         noData: false
       }));
 
