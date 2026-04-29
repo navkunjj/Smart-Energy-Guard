@@ -53,7 +53,6 @@ const StatusGrid = ({ status, readings, theft }) => {
       sensors: [
         { name: 'Pole 1', desc: 'Total Current', value: d.PCS1 || 0, color: 'bg-blue-500', textColor: 'text-blue-400' },
         { name: 'House 1', desc: 'Load', value: d.CS1 || 0, color: 'bg-indigo-500', textColor: 'text-indigo-400' },
-        { name: 'House 2', desc: 'Load', value: d.CS2 || 0, color: 'bg-violet-500', textColor: 'text-violet-400' },
       ],
     },
     {
@@ -61,7 +60,8 @@ const StatusGrid = ({ status, readings, theft }) => {
       isTheft: theft?.pole2Theft,
       sensors: [
         { name: 'Pole 2', desc: 'Total Current', value: d.PCS2 || 0, color: 'bg-cyan-500', textColor: 'text-cyan-400' },
-        { name: 'House 3', desc: 'Load', value: d.CS3 || 0, color: 'bg-teal-500', textColor: 'text-teal-400' },
+        { name: 'House 2', desc: 'Load', value: d.CS2 || 0, color: 'bg-teal-500', textColor: 'text-teal-400' },
+        { name: 'House 3', desc: 'Load', value: d.CS3 || 0, color: 'bg-emerald-500', textColor: 'text-emerald-400' },
       ],
     },
   ];

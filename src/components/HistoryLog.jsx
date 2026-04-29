@@ -29,8 +29,8 @@ const HistoryLog = ({ history }) => {
           <tbody className="divide-y divide-[var(--card-border)]">
             {[...history].reverse().map((entry, idx) => {
               const mainOk  = isWithinTolerance(entry.CS4 || 0, (entry.PCS1 || 0) + (entry.PCS2 || 0));
-              const pole1Ok = isWithinTolerance(entry.PCS1 || 0, (entry.CS1 || 0) + (entry.CS2 || 0));
-              const pole2Ok = isWithinTolerance(entry.PCS2 || 0, entry.CS3 || 0);
+              const pole1Ok = isWithinTolerance(entry.PCS1 || 0, entry.CS1 || 0);                          // Pole 1: 1 house
+              const pole2Ok = isWithinTolerance(entry.PCS2 || 0, (entry.CS2 || 0) + (entry.CS3 || 0));    // Pole 2: 2 houses
               const allOk   = mainOk && pole1Ok && pole2Ok;
 
               return (

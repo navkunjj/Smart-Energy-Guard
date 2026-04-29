@@ -162,44 +162,20 @@ const SettingsModal = ({
 
             {activeTab === 'notifications' && (
               <div className="space-y-6">
-                <section className="flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/5">
+                <section className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/5">
+                  <div className="p-2 bg-emerald-500/10 rounded-xl shrink-0">
+                    <Bell size={16} className="text-emerald-400" />
+                  </div>
                   <div>
-                    <h4 className="text-sm font-bold">High-Intensity Alerts</h4>
-                    <p className="text-xs opacity-40 font-medium">Enable audible siren and full-screen pop-ups</p>
-                  </div>
-                  <div 
-                    onClick={() => updateSettings('sirenEnabled', !settings.sirenEnabled)}
-                    className={`w-12 h-6 rounded-full p-1 cursor-pointer transition-all ${settings.sirenEnabled ? 'bg-rose-500' : 'bg-white/10'}`}
-                  >
-                    <div className={`w-4 h-4 bg-white rounded-full transition-all ${settings.sirenEnabled ? 'translate-x-6' : 'translate-x-0'}`} />
-                  </div>
-                </section>
-
-                <div className={`p-4 rounded-xl border transition-all ${settings.sirenEnabled ? 'bg-rose-500/5 border-rose-500/10' : 'bg-white/5 border-white/5 opacity-40'}`}>
-                  <p className="text-[10px] font-bold leading-relaxed uppercase tracking-wider text-center">
-                    {settings.sirenEnabled 
-                      ? "⚡ SIREN & POP-UP ACTIVE" 
-                      : "🔕 SILENT MODE (BANNER ONLY)"}
-                  </p>
-                </div>
-
-                <section>
-                  <label className="text-[10px] font-black uppercase tracking-widest opacity-30 mb-2 block">Siren Auto-Stop (Seconds)</label>
-                  <div className="flex items-center gap-4">
-                    <input 
-                      type="range" 
-                      min="5" 
-                      max="300" 
-                      step="5" 
-                      value={settings.sirenTimeout}
-                      onChange={(e) => updateSettings('sirenTimeout', parseInt(e.target.value))}
-                      className="flex-1 accent-blue-500 h-1.5 bg-white/10 rounded-full appearance-none cursor-pointer"
-                    />
-                    <span className="text-sm font-black tabular-nums w-12 text-blue-400">{settings.sirenTimeout}s</span>
+                    <h4 className="text-sm font-bold">Visual Alerts Only</h4>
+                    <p className="text-xs opacity-40 font-medium mt-0.5">
+                      Theft events display a banner on screen. No audible alerts are active.
+                    </p>
                   </div>
                 </section>
               </div>
             )}
+
 
             {activeTab === 'system' && (
               <div className="space-y-6">

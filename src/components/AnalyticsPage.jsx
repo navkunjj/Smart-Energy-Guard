@@ -67,7 +67,7 @@ const AnalyticsPage = ({ readings, history = [], theft }) => {
     ],
   };
 
-  // ── Chart 2: PCS1 vs (CS1 + CS2) — Pole 1 check ───────────────
+  // ── Chart 2: PCS1 vs CS1 — Pole 1 check (1 house) ──────────────
   const pole1CompareData = {
     labels,
     datasets: [
@@ -79,8 +79,8 @@ const AnalyticsPage = ({ readings, history = [], theft }) => {
         fill: true, tension: 0.4, pointRadius: 2, borderWidth: 2,
       },
       {
-        label: 'Pole 1 Loads (H1+H2)',
-        data: history.map(d => (d.CS1 ?? 0) + (d.CS2 ?? 0)),
+        label: 'House 1 Load',
+        data: history.map(d => d.CS1 ?? 0),
         borderColor: '#06b6d4',
         backgroundColor: 'rgba(6,182,212,0.06)',
         fill: true, tension: 0.4, pointRadius: 2, borderWidth: 2,
@@ -88,7 +88,7 @@ const AnalyticsPage = ({ readings, history = [], theft }) => {
     ],
   };
 
-  // ── Chart 3: PCS2 vs CS3 — Pole 2 check ───────────────────────
+  // ── Chart 3: PCS2 vs (CS2 + CS3) — Pole 2 check (2 houses) ─────
   const pole2CompareData = {
     labels,
     datasets: [
@@ -100,8 +100,8 @@ const AnalyticsPage = ({ readings, history = [], theft }) => {
         fill: true, tension: 0.4, pointRadius: 2, borderWidth: 2,
       },
       {
-        label: 'House 3 Load',
-        data: history.map(d => d.CS3 ?? 0),
+        label: 'Pole 2 Loads (H2+H3)',
+        data: history.map(d => (d.CS2 ?? 0) + (d.CS3 ?? 0)),
         borderColor: '#10b981',
         backgroundColor: 'rgba(16,185,129,0.06)',
         fill: true, tension: 0.4, pointRadius: 2, borderWidth: 2,
@@ -109,13 +109,13 @@ const AnalyticsPage = ({ readings, history = [], theft }) => {
     ],
   };
 
-  // ── Doughnut: load distribution ─────────────────────────────────
+  // ── Doughnut: load distribution (all 3 houses) ──────────────────
   const doughnutData = {
-    labels: ['House 1', 'House 2', 'House 3'],
+    labels: ['House 1 (Pole 1)', 'House 2 (Pole 2)', 'House 3 (Pole 2)'],
     datasets: [{
       data: [readings.CS1 || 0, readings.CS2 || 0, readings.CS3 || 0],
-      backgroundColor: ['rgba(59,130,246,0.8)', 'rgba(168,85,247,0.8)', 'rgba(16,185,129,0.8)'],
-      borderColor: ['#3b82f6', '#a855f7', '#10b981'],
+      backgroundColor: ['rgba(99,102,241,0.8)', 'rgba(20,184,166,0.8)', 'rgba(16,185,129,0.8)'],
+      borderColor: ['#6366f1', '#14b8a6', '#10b981'],
       borderWidth: 2,
     }],
   };
@@ -128,17 +128,21 @@ const AnalyticsPage = ({ readings, history = [], theft }) => {
     },
   };
 
-  // ── Bar chart: all sensors ──────────────────────────────────────
+  // ── Bar chart: all sensors (hierarchical order: Main → Pole1 → H1 → Pole2 → H2 → H3)
   const barData = {
-    labels: ['House 1', 'House 2', 'House 3', 'Pole 1', 'Pole 2', 'Main Input'],
+    labels: ['Main Input', 'Pole 1', 'House 1', 'Pole 2', 'House 2', 'House 3'],
     datasets: [{
       label: 'Current (A)',
-      data: [readings.CS1, readings.CS2, readings.CS3, readings.PCS1, readings.PCS2, readings.CS4],
+      data: [readings.CS4, readings.PCS1, readings.CS1, readings.PCS2, readings.CS2, readings.CS3],
       backgroundColor: [
-        'rgba(59,130,246,0.7)', 'rgba(168,85,247,0.7)', 'rgba(16,185,129,0.7)',
-        'rgba(6,182,212,0.7)', 'rgba(245,158,11,0.7)', 'rgba(244,63,94,0.7)',
+        'rgba(244,63,94,0.7)',   // Main Input  — rose
+        'rgba(59,130,246,0.7)', // Pole 1      — blue
+        'rgba(99,102,241,0.7)', // House 1     — indigo
+        'rgba(245,158,11,0.7)', // Pole 2      — amber
+        'rgba(20,184,166,0.7)', // House 2     — teal
+        'rgba(16,185,129,0.7)', // House 3     — emerald
       ],
-      borderColor: ['#3b82f6', '#a855f7', '#10b981', '#06b6d4', '#f59e0b', '#f43f5e'],
+      borderColor: ['#f43f5e', '#3b82f6', '#6366f1', '#f59e0b', '#14b8a6', '#10b981'],
       borderWidth: 2, borderRadius: 8,
     }],
   };
@@ -153,8 +157,8 @@ const AnalyticsPage = ({ readings, history = [], theft }) => {
   // ── Stat Cards ──────────────────────────────────────────────────
   const statCards = [
     { label: 'Main Input', value: `${readings.CS4 || 0}`, unit: 'A', icon: Zap, color: 'rose' },
-    { label: 'Pole 1 Total', value: `${readings.PCS1 || 0}`, unit: 'A', icon: GitBranch, color: 'blue' },
-    { label: 'Pole 2 Total', value: `${readings.PCS2 || 0}`, unit: 'A', icon: GitBranch, color: 'cyan' },
+    { label: 'Pole 1 (1 House)', value: `${readings.PCS1 || 0}`, unit: 'A', icon: GitBranch, color: 'blue' },
+    { label: 'Pole 2 (2 Houses)', value: `${readings.PCS2 || 0}`, unit: 'A', icon: GitBranch, color: 'cyan' },
     { label: 'Total Loads', value: `${totalLoad.toFixed(2)}`, unit: 'A', icon: Home, color: 'green' },
   ];
 
@@ -217,7 +221,7 @@ const AnalyticsPage = ({ readings, history = [], theft }) => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <div className={`glass-card p-6 rounded-2xl ${theft?.pole1Theft ? 'border border-rose-500/30' : ''}`}>
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-bold uppercase tracking-wider">Pole 1 Total vs Houses</h3>
+            <h3 className="text-sm font-bold uppercase tracking-wider">Pole 1 Total vs House 1</h3>
             {theft?.pole1Theft && (
               <span className="text-[10px] font-black text-rose-400 bg-rose-500/10 px-2.5 py-1 rounded-full border border-rose-500/20 uppercase animate-pulse">
                 ⚠ Pole 1
@@ -231,7 +235,7 @@ const AnalyticsPage = ({ readings, history = [], theft }) => {
 
         <div className={`glass-card p-6 rounded-2xl ${theft?.pole2Theft ? 'border border-rose-500/30' : ''}`}>
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-bold uppercase tracking-wider">Pole 2 Total vs House 3</h3>
+            <h3 className="text-sm font-bold uppercase tracking-wider">Pole 2 Total vs Houses 2 &amp; 3</h3>
             {theft?.pole2Theft && (
               <span className="text-[10px] font-black text-rose-400 bg-rose-500/10 px-2.5 py-1 rounded-full border border-rose-500/20 uppercase animate-pulse">
                 ⚠ Pole 2

@@ -31,11 +31,17 @@ function AuthenticatedApp() {
   // ── Persistent App Settings ─────────────────────────────────────
   const [appSettings, setAppSettings] = useState(() => {
     const saved = localStorage.getItem('eg_settings');
-    return saved ? JSON.parse(saved) : {
-      tolerance: 0.2,
-      sirenEnabled: true,
-      sirenTimeout: 60,
+    const defaults = {
+      tolerance: 0.3,
     };
+    if (!saved) return defaults;
+    const parsed = JSON.parse(saved);
+    // Migrate: if saved tolerance is below 0.3, bump it up
+    if (!parsed.tolerance || parsed.tolerance < 0.3) {
+      parsed.tolerance = 0.3;
+      localStorage.setItem('eg_settings', JSON.stringify(parsed));
+    }
+    return parsed;
   });
 
   const updateSettings = (key, val) => {
@@ -158,7 +164,6 @@ function AuthenticatedApp() {
         <TheftAlertBanner 
           theft={theft} 
           isOffline={!status.esp32Online} 
-          settings={appSettings}
         />
 
         {/* ── Page Content ───────────────────────────────────────── */}
