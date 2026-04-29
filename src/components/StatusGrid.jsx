@@ -15,7 +15,7 @@ const StatusGrid = ({ status, readings, theft }) => {
   // ── Hero Cards ──────────────────────────────────────────────────
   const heroCards = [
     {
-      title: 'Battery',
+      title: 'Voltage',
       value: isOffline ? '0.0V' : `${(status.batteryVoltage || d?.voltage || 0).toFixed(1)}V`,
       icon: Battery,
       color: isOffline ? 'text-rose-400 opacity-50' : 'text-blue-400',

@@ -112,22 +112,6 @@ const SettingsModal = ({
                   </div>
                 </section>
 
-                <section>
-                  <label className="text-[10px] font-black uppercase tracking-widest opacity-30 mb-2 block">System Tolerance (Amps)</label>
-                  <div className="flex items-center gap-4">
-                    <input 
-                      type="range" 
-                      min="0.05" 
-                      max="1.0" 
-                      step="0.05" 
-                      value={settings.tolerance}
-                      onChange={(e) => updateSettings('tolerance', parseFloat(e.target.value))}
-                      className="flex-1 accent-blue-500 h-1.5 bg-white/10 rounded-full appearance-none cursor-pointer"
-                    />
-                    <span className="text-sm font-black tabular-nums w-12 text-blue-400">{settings.tolerance.toFixed(2)}A</span>
-                  </div>
-                  <p className="text-[10px] opacity-40 mt-2 font-medium italic">Higher tolerance reduces false alarms but may miss small thefts.</p>
-                </section>
               </div>
             )}
 
